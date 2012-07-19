@@ -1,0 +1,139 @@
+An Introduction to Sphinx
+========================================================================
+
+- http://freelancing-god.github.com/ts/en/sphinx_basics.html
+
+- What is sphinx?
+  - search engine
+    - input: document
+  - document
+    - unique identifier
+    - text
+  - daemon indexes data
+    - talks to data source
+      - mysql
+      - postgresql
+      - xml
+  - client searches sphinx db
+
+- sphinx structure
+  - daemon talks to collection of indexes
+  - index
+    - tracks documents
+  - document
+    - fields
+    - attributes
+
+- fields
+  - field
+    - content of search query
+    - words tied to specific document
+    - numbers and dates are treated as strings
+
+- attributes
+  - used to sort, filter and group search results
+  - values are ignored in searches
+  - can be integer, float, datetime, booleans, strings
+  - string attributes are coverted to ordinal integers
+
+- multi-value attrbutes
+  - array of attributes for a single document
+  - only integers are supported
+
+Indexing your models
+========================================================================
+
+- http://freelancing-god.github.com/ts/en/indexing.html
+
+- define_index method
+  - must be below associations
+
+- fields
+  - indexes method
+    - references model's column names
+    - cannot reference model methods
+    - sphinx talks directly to db
+    - why not just specify everything using a symbol???
+  - :as
+    - alias, as it appears in the sphinx db, I think
+  - :sortable
+  - :facet
+    - what's a facet???
+  - associations
+    - index author(:name), :as => :author
+      - index the name of the author of this document
+    - index author.location, :as => :author_location
+      - index the location of the author of this document
+    - explicit aliases are required
+    - can index raw sql
+      - index "LOWER(first_name)", :as => :first_name
+
+- attributes
+  - has author_id
+  - attributes are automatically sortable
+
+- conditions and groupings
+  - where "status = 'active'"
+  - group_by "user_id"
+
+- processing your index
+  - rake ts:in
+  - "distributed index cannot be directly indexed" is only a warning
+  - structural changes to your index requires: stop, re-index, and restart
+    - rake ts:rebuild
+
+Searching
+========================================================================
+
+- http://freelancing-god.github.com/ts/en/searching.html
+
+Testing
+========================================================================
+
+- http://freelancing-god.github.com/ts/en/testing.html
+
+- unit tests and specs
+  - stub search calls
+
+- cucumber
+  - helper for cucumber
+    - Cucumber::ThinkingSphinx::ExternalWorld.new
+      - what does that do???
+
+  - you need to turn off transaction fixtures
+      - indexing will not include your transaction's changes
+
+  - need to clear all the data between scenarios
+  - Before block
+  - use database clearner
+    - model.delete_all
+
+  - sphinx will automatically index and start daemon when you run
+    feature, but only once at the very beginning, not for every scenario
+
+  - to reindex during specific scenarios
+    - ThinkingSphinx::Test.index; sleep(0.25) so that sphinx can catch up
+
+- rails functional and integration tests
+  - require 'thinking_sphinx/test'
+  - ThinkingSphinx::Test.init
+
+  - to run for all tests
+    - ThinkingSphinx::Test.start_with_autostop
+
+  - start and stop as required
+    - ThinkingSphinx::Test.start
+    - ThinkingSphinx::Test.stop
+    - ThinkingSphinx::Test.run do end
+    - ThinkingSphinx::Test.index
+
+
+
+
+
+
+
+
+
+
+

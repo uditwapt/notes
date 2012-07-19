@@ -1,0 +1,366 @@
+CSS tricks - core concepts
+==========================
+
+The CSS Box Model
+========================================================================
+
+- every element in web design is a rectagular box
+- margin does not affect size of box, but affects other content
+  interacting with the box
+
+What if these values are undeclared?
+------------------------------------
+
+- default values are probably zero
+
+The Default Width of Block Level Boxes
+--------------------------------------
+
+- if you don't declare a width, and the box has static or relative
+  positioning, the width will remain 100% and the padding and border
+  will push inwards instead of outwards
+- if you declare a width, padding will push the box outward
+- default width is not 100% but whatever is left
+- text-area elements are problematic
+
+Absolute Boxes with No Width
+----------------------------
+
+- with no width - only as wide as it need to hold the content, until it
+  is 100% of the parent's width (nearest parent with relative
+  positioning)
+
+Floated Boxes With No Width
+---------------------------
+
+- same behaviour as absolute boxes with no width
+- do not rely on default width values.
+- set a width on anything floated, absolutely positioned or fixed
+  positioned
+
+Inline Elements are Boxes Too
+-----------------------------
+
+- skinny boxes that wrap at every line
+- left margin starts at first line, right margin at last line
+- padding is ignored in between lines, where line-height rules
+
+
+All about floats
+========================================================================
+
+What is Float?
+--------------
+
+- floated elements remain a part of the flow of the web page
+- absolute positioned page elements are removed from the flow
+- float values
+  - left, right, none, inherit
+  - none is default
+
+What are floats used for?
+-------------------------
+
+- alternative - relative positioning on container and absolute positioning
+  on element
+
+Clearing the float
+------------------
+
+- clear
+  - will move element past the float
+- clear values
+  - both left right none inherit
+  - inherit is not supported by IE
+  - both is commonly used
+  - use of clear:left (or right)
+
+    text text float:right
+    text text clear:right
+    text text text text
+
+The great collapse
+------------------
+
+- if the parent element contained nothing but floated elements, the
+  height of it would literally collapse to nothing
+  - alternative is worse
+  - solution - clear the float after the floated elements in the container
+    but before the close of the container
+
+Techniques for clearing floats
+------------------------------
+
+- empty div method
+  - sometimes br is used
+- overflow method
+  - setting the parent's overflow to auto or hidden will make the parent
+    expand to contain the flaots
+  - not specifically meant for clearing floats
+- easy clearing method
+  - clearfix:after
+  - add to parent
+
+Problems with floats
+--------------------
+
+- fragile cause of IE6
+- pushdown
+  - item in floated item is wider than float, pushing items outside of
+    float down - IE problem
+  - fix: use overflow:hidden
+- double margin bug
+  - apply margin in same direction as float doubles the margin
+  - fix: set display:inline on float
+- 3px jog
+  - text up next to a floated element is mysteiously kicked away by 3px
+  - fix: set width or height on affected text
+- bottom margin bug
+  - ie 7
+  - when floated parent has floated children, bottom margin on childre
+    is ignored by parent
+  - fix: use bottom padding on parent instead
+
+Alternatives
+------------
+
+- faux absolute positioning
+- css3 template layout module
+
+
+The CSS Overflow Property
+========================================================================
+
+- behaviour of boxes is controlled by CSS
+  - when content inside or around it changes
+  - example: height of box grows to accomodate its content
+
+- what happens when you specify height or width and the content
+  cannot fit it?
+
+Visible
+-------
+
+- content that extends beyond the box is visible and renders outside
+  the box
+- content ouside of box won't push down content like you might assume
+- generallly, don't set static heights on boxes with web text in them
+
+Hidden
+-------
+
+- hides everything outside the box
+
+Scroll
+------
+
+- hidden but with scrollbars!
+- even if not needed
+
+Auto
+----
+
+- better than scroll, cause it adds scrollbars only where you need them
+
+Float Clearing
+--------------
+
+- setting overflow doesn't clear the float at the element, it self-clears
+- apply on parent
+
+Cross browser concerns
+----------------------
+
+- scrollbars inside or outside of the box
+- ie8 expanding box bug
+- breaking floated layouts
+- visible is screwed up in IE 6, 7, 8
+
+Can scroll bars be styled with CSS?
+-----------------------------------
+
+- better with JavaScript
+
+IE trick
+--------
+
+
+px – em – % – pt – keyword
+========================================================================
+
+keyword
+-------
+
+- xx-small, x-small, small, medium, large, x-large, xx-large
+- smaller, larger - based on parent
+- consider line breaks and paragraph height
+
+pixels
+------
+
+- large and smaller will still work
+- in ie6, cannot be resized by the user
+
+em
+--
+
+- 1em - current font-size of element in question
+- probably 16px - browser default
+- width of uppercase M
+- set font-size of body to 62.5% - sets to 10px
+- 10 is a easy multiplier
+- three reasons
+  - resizable in ie6
+  - relationship with other sizes
+  - cascades like mofo
+- em can be used for any other length
+- cascades - depends on parent
+- don't apply on generic html elements
+
+
+%
+-
+
+- % of parent
+
+pt
+--
+
+- pt - only for print css
+- 72pts - one inch
+
+
+CSS Transparency Settings for All Browsers
+==========================================
+
+    .transparent_class {
+      filter:alpha(opacity=50);
+      -moz-opacity:0.5;
+      -khtml-opacity: 0.5;
+      opacity: 0.5;
+    }
+
+CSS Sprites: What They Are, Why They’re Cool, and How To Use Them
+=================================================================
+
+You’ve heard of them, but…
+--------------------------
+
+Why combine all those images? Isn’t it quicker to have smaller images?
+----------------------------------------------------------------------
+- No, too many http requests
+
+OK. So how is it done?
+----------------------
+
+- background position
+- negative Y coordinates?
+
+Ugh. That sounds like a lot of work.
+------------------------------------
+
+spriteme
+
+Using SpriteMe
+--------------
+
+What can’t sprites do?
+----------------------
+
+- cannot do repeating graphics
+
+Either start from the beginning with Sprites, or do it all at the end
+---------------------------------------------------------------------
+
+
+Nine Techniques for CSS Image Replacement
+========================================================================
+
+
+What is Vertical Align?
+========================================================================
+
+- aligns an inline child with respect to its parent
+- values
+  - baseline, sub, super, top, text-top, middle, bottom, text-bottom,
+    length, value in percentage
+
+- doesn't work as expected with block elements
+  - see http://blog.themeforest.net/tutorials/vertical-centering-with-css/
+
+
+baseline
+--------
+
+- default value
+- descenders go below baseline
+
+middle
+------
+
+-  most common use
+
+text-top and text-bottom
+------------------------
+
+- aligns with topmost or bottom most text
+
+top and bottom
+--------------
+
+
+Vertical Align on Table Cells
+-----------------------------
+
+-  table cells default to middle vertical alignment
+
+Vertical Align and Inline-Block
+-------------------------------
+
+- images behave more like inline-block elements
+  - you can set their width and height and they obey that, unlike most
+    inline elements
+- inline-blocks are not treated the same way
+  - http://vivifystudios.com/articles-css-inline-block/
+
+Deprecated as an attribute
+--------------------------
+
+- valign
+
+
+Basic Explanations of Positioning
+========================================================================
+
+- http://www.barelyfitz.com/screencast/html-training/css/positioning/
+
+- static
+  - element will into page as it normally would
+  - positioning doesn't cascade
+
+- relative
+  - relative to itself
+  - if you add positioning attribute, like top:10px, it will shift it's
+    own position down from where it would NORMALLY be.
+  - you can use z-index on element with relative positioning
+  - element will appear on top of statically positioned element
+  - any element that is a child of a relatively positioned element can
+    be absolutely positioned within that block.
+
+- absolute
+  - top left right bottom
+  - relative to the next parent element with relative or absolute
+    positioning
+
+- fixed
+  - rare
+  - positioned relative to the viewport or the browser window
+  - think frames
+
+
+
+
+
+
+
+

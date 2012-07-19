@@ -1,0 +1,95 @@
+http://phrogz.net/js/classes/OOPinJS.html
+========================================================================
+
+part 1
+------------------------------------------------------------------------
+
+- summary
+  - private variables
+    - var inside object constructor
+  - private functions
+    - function inside object contructor
+
+  - priviledged methods
+    - this.methodname = function();
+
+  - public properties
+    - this.variablename
+
+  - puclic methods
+    - Classname.prototype.methodname = function(){};
+
+  - prototype properties
+    - Classname.prototype.propertyname = property;
+
+  - static properties
+    - Classname.propertyname = property;
+
+- example code
+  - this.constructor ??
+
+  - priviledged methods
+    - methods that each object will have
+    - not inferred from the object's prototype, unlike public methods
+    - will always override public methods
+
+  - object.toString - implicit
+
+  - protoype properties are shared by all object instances
+
+  - private and priviledged methods are instantiated with each new object created.
+
+part 2
+------------------------------------------------------------------------
+
+- summary
+  - ClildClassName.prototype = new ParentClass() - the prototype of the child is an instance of the parent
+  - ChildClassName.prototype.constructor=ChildClassName.
+    - you need to remember to reset the constructor property for the class
+
+  - you can call ancestor methods using Function.call()
+
+- example
+  - why is the cat's offspring set to [] ???
+
+
+- using the .constructor property
+  - every object in js has a property named constructor that points to its parent class
+
+- calling 'super' methods
+  - Mammal.prototype.haveaBaby.call(this);
+    - this calls the haveABaby method of Mammal.prototype
+
+- making your own 'super' property
+
+  - Cat.prototype.parent = Mammal.prototype
+    - you can now do this.parent.haveaBaby.call(this);
+
+- spoofing pure virtual classes
+  - make the virtual class an object instead of a function
+
+  - LivingThing = {}
+  - Mammal.prototype = LivingThing;
+  - Mammal.prototype.parent = LivingThing; // not LivingThing.prototype
+
+- convenient inheritance
+  - call immediately after your constructor
+
+common functions
+========================================================================
+
+- Join two arrays - concat()
+- Join three arrays - concat()
+- Join all elements of an array into a string - join()
+- Remove the last element of an array - pop()
+- Add new elements to the end of an array - push()
+- Reverse the order of the elements in an array - reverse()
+- Remove the first element of an array - shift()
+- Select elements from an array - slice()
+- Sort an array (alphabetically and ascending) - sort()
+- Sort numbers (numerically and ascending) - sort()
+- Sort numbers (numerically and descending) - sort()
+- Add an element to position 2 in an array - splice()
+- Convert an array to a string - toString()
+- Add new elements to the beginning of an array - unshift()
+

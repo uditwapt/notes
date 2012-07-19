@@ -1,0 +1,92 @@
+------------------------------------------------------------------------
+2012-06-07: baweb test and cucumber apps cannot connect to /var/tmp/mysql/mysqld.sock
+
+Why? In-memory mysql database might not be set up correctly.
+Why? /home/gsmendoza/bin/tmp_mysqld_safe might not successful.
+Why? mysql_install_db --datadir=/var/tmp/mysql might not be successful.
+Why? mysql_install_db is trying to create database with user "mysql" instead of local user.
+Why? /etc/mysql/my.cnf's user is set to mysql
+
+Solution:
+
+Copy /etc/mysql/my.cnf to ~/.my.cnf
+In ~/.my.cnf, change user to gsmendoza
+
+------------------------------------------------------------------------
+2012-05-23: ngpod scraper is not running
+
+Cause: Upgrade to Ubuntu 12.04.
+
+Solution: reinstall rmagick gem
+
+------------------------------------------------------------------------
+2012-05-23: running rake app:test:prepare in baweb throws "Can't connect to local MySql Server through socket mysqld.sock"
+
+Cause: Upgrade to Ubuntu 12.04.
+
+Solution: remove the "socket: /var/tmp/mysql/mysqld.sock" line in config/database.yml
+
+------------------------------------------------------------------------
+2012-05-23: libmysqlclient_r.so.16: cannot open shared object file: No such file or directory: mysql2.so
+
+Description:
+
+/home/gsmendoza/.rvm/gems/ruby-1.9.3-p0@baweb/gems/activesupport-3.0.12/lib/active_support/dependencies.rb:242:in `require': libmysqlclient_r.so.16: cannot open shared object file: No such file or directory - /home/gsmendoza/.rvm/gems/ruby-1.9.3-p0@baweb/gems/mysql2-0.2.18/lib/mysql2/mysql2.so (LoadError)
+
+Source: http://stackoverflow.com/questions/8456300/mysql2-so-libmysqlclient-r-so-15-cannot-open-shared-object-file-no-such-file
+Cause: Upgrade to 12.04
+
+Solution: reinstall mysql2 gem
+
+------------------------------------------------------------------------
+2012-05-20: Upgrade to 12.04 - desktop background and screensaver
+
+* desktop background: update /usr/shares/backgrounds/contest
+* screensaver: install xscreensaver
+
+------------------------------------------------------------------------
+2012-05-20: Upgrade to 12.04 - cannot boot
+
+Error: no such partition
+
+Solution: install boot-repair
+
+Source: askubuntu.com .. grub complains of no such partition after installing 1204
+
+------------------------------------------------------------------------
+2012-03-05: Fix diakonos 'add clip' error.
+
+Remove diakonos from apt-get.
+
+Download diakonos from server
+
+rvm use ruby-1.9.3-p0
+ruby install.rb
+
+------------------------------------------------------------------------
+2012-01-21: Install passenger in Ruby 1.9
+
+http://www.modrails.com/documentation/Users%20guide%20Standalone.html
+
+ruby -v # should be 1.9
+
+gem install passenger
+
+passenger start
+
+------------------------------------------------------------------------
+2011-12-11: Upgrade to Ubuntu 11-10.
+
+Fix tuxguitar: no sound from timidity when tuxguitar is open.
+  Change tuxguitar midi port to Gervill.
+
+Fix ngpod_scraper: rmagick is depending on old version of image magick.
+  Reinstall rmagick.
+
+Fix wallpaper: does not automatically change.
+  Set wallpaper to contest and edit /usr/shares/backgrounds/contest/background-1.xml.
+  WARNING!!! Do not touch /usr/shares/backgrounds/contest/background-1.xml via shell script (~/bin/ngpod). Crashes system!!!
+
+Fix screensaver: pictures slideshow screensaver and other screensavers have been removed.
+  See http://www.webupd8.org/2011/10/things-to-tweak-after-installing-ubuntu.html.
+

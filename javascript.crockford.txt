@@ -1,0 +1,982 @@
+Douglas Crockford - The Javascript Programming Language
+==============================================
+
+part 1
+-------------------------------------------------
+
+- key ideas
+	- load and go delivery 
+		- javascript is delivered as source code
+	- loose typing
+		- NOT strong typing
+		- expressive power
+	- objects as general containers
+		- objects as hashes
+	- prototypal inheritance
+		- objects inherit from other objects
+		- class free language
+	- lambda
+		- functions as first class objects
+	- linkage through global variables
+		- no linker
+	 	- bad idea - reliability, security ideas
+	 	- global namespace
+
+- values
+	- numbers
+		- just double
+		- no integers
+		- 0.1 + 0.2 != 0.3
+		- multiply cents by 100
+		- NAN
+			- toxic
+			- not equal to anything
+			- NAN != NAN
+			- not(NAN < NAN) && not(NAN > NAN)
+			- but NAN is a number
+		- Number(value) function
+			- converts value to number
+			- returns NAN if it has problem
+			- similar to + prefix - addition
+		- parseInt(value, 10)
+			- stop at first non-digit character
+			- radix(10) is required
+			- parseInt('08') == 0 
+				// it thinks its octal
+			- separate Math object
+				- abs floor log max pow random round
+					sin sqrt
+	
+- strings
+	- ucs2, not utf16
+		- no awareness of surrogate pairs
+			- some characters are not available
+			- japanese?
+	- no character type
+	- immutable
+	- similar strings are equal - good!
+	- '' or "" 
+	- string.length
+		- number of 16-bit characters
+		- not the same as number of unicode
+			characters
+		- String(value)
+		- methods
+			charAt concat indexOf lastIndexOf match
+			replace search slice split substring
+			toLowerCase toUpperCase
+	
+- booleans
+	- true false
+	- Boolean(value)
+	- truthy 
+		- '0' 'false'
+	- falsy
+		- false null undefined '' 0 NaN
+	- !!
+
+- null
+	- value that isn't anything
+
+- undefined
+	- value that isn't even that
+	- default value for variables and parameters
+	- value of missing members in objects
+	- value can be defined undefined?
+
+- case sensitivity		
+	- all keywords are lowercase
+	- case sensitive
+	
+
+- dynamic objects
+	- unification of object and hash
+	- new Object() => {}
+	- name (key?) - any string
+		value - any value except undefined
+	- .value or [value]
+	- hash nature is not visible
+		- no hash code or rehash
+		
+- loosely typed
+	- not 'untyped'
+	- any type can be used anywhere
+	
+- C
+	- javascript allows functions to be values
+	
+- Identifiers
+	- start with letter, _, $
+	- convention
+		- start with lower case
+	- constructors start with upper case
+	- initial _ 
+		- for implementations
+		- internal variable
+	- initial $ 
+		- for machines
+		- macroprocessors
+		- ajax community love $
+		
+- reserved words
+	- very strict
+
+- comments
+	//, /* */
+	
+- operators
+	- +
+		- number + number = number
+		- number + string = string
+		- bad idea
+		- prefix - +"42" = 42
+		
+	- /
+		- integer / integer = float
+		
+	- == !=
+		- can do type coercion
+		- better to use === and !===
+			- exact equality
+			
+	- &&
+		- guard operator
+		- truthyiness
+		- can avoid null references
+			a && a.member
+			
+	- ||
+		- default operator
+		- last = input || nr_items
+		
+	- ! & !! 
+		- produces booleans
+		
+	- bitwise
+		- float -> integer -> float
+		- slower
+
+part 2	
+-------------------------------------------------	
+
+- labeled break
+	loop: for (;;) {
+		break loop;
+	}
+
+- for statement
+	- for (var name in object)
+			// each member (key) of object
+			// including inherited ones
+			if (object.hasOwnProperty(name))
+			
+- switch statement
+	- switch value can be string
+	- case can be expression
+	- switch(expression) {
+			case ';': 
+				break;
+			default:
+		}
+		
+- throw statement
+	- throw new Error(reason)
+	- throw {
+			name: exceptionName,
+			message: reason
+		}
+
+- try statement
+	try {
+	}
+	catch(e) {
+		switch (e.name) {
+			case 'Error'
+			default:
+		}
+	}
+	
+	- exceptions
+		- Error, EvalError, Range, Syntax, Type, URI
+		
+- with statement
+	with (o) {
+		foo = null
+	}
+	- don't use it
+
+- function
+	- function name(parameters) {}
+	
+- var statements
+	- defines variables _within a function_
+		var name;
+		var errors = 0;
+		var a, b, c;
+
+- scope
+	- blocks do not have scope
+	- only functions have scope
+	- vars in function are not visible outside
+	- var declared twice in func is created once
+	- implied globals?
+		- variable that is created but not declared
+			(with var?)
+
+- return
+	- return; => undefined
+		- but in constructors, 
+			- returns return; => this	
+			
+- objects
+	- contain data and methods
+	- inherit from other objects
+	
+	- collections
+		- name/value pairs
+		- name is string
+		- value - any type
+	
+	- object literal
+		- {}
+		- name can be name or string
+		- value can be expression
+		- : ,
+		- anywhere where a value appears
+		- object.name
+		- object['name']
+		- what about object[name] ???
+		- no trailing comment inside literal
+	
+	- maker function
+		- function maker(parameters){
+				var it;
+				return it;
+			}
+		- maker(paramters);
+		- is this a special function???
+	
+	- best practice 
+		- pass object instead of multiple values as
+			parameters to function	
+		
+	- object augmentation
+		- new members can be added via simple
+			assignment
+		- myobject.format.colorModel = 'YCgCb'
+		- do I need to use object[name] notation to 
+			add new members???
+		
+	- linkage (inheritance)
+		- secret links??? like a reference?
+		- secret link to "parent" object
+		- new members are added to primary object
+		- object(o) => new empty object inheriting 
+			from o
+		- think of it as object(o) inherits its
+			members from o. Updating the members of
+			object(o) does not update o
+
+	- prototypal inheritance
+		- object customization
+			- less work than making a class
+			- less overhead
+			- key 1: object(o)
+			- key 2: functions
+
+- questions		
+	- what happens to new object if old is set to 
+		undefined?
+		- old object will still exist, although
+			it won't be pointed to by "old object"
+	- linkage won't break
+	- new object is sensitive to changes on old 
+		object
+	- deleting members will make new object refer
+		the member from the old object again!!!
+	- single inheritance
+	- linkages cannot be changed
+	- has garbage collection
+	
+- Object methods
+	- Object.prototype
+		.hasOwnProperty(name)
+	- no copy method
+		- omission
+	- no equals method
+		- no value comparison
+		
+- Object construction
+	- new Object()
+	- {} - preferred
+	- object(Object.prototype)
+	
+- Reference
+	- objects are always passed by reference, not 
+		by value
+	- === compares object referece, not value
+
+- Delete operator
+	- remove member
+	- delete myobject[name];
+	- delete myobject.name
+	- sets value to undefined
+	
+- Arrays
+	- inherits from Object
+	- indexes are converted to strings and used 
+		as names
+	- efficient for sparse arrays
+	- not very efficient
+	- no need to provide length
+	- length
+		- 1 larger than the highest integer 
+			subscript
+	- do not user for..in !!!
+
+	- Array Literals
+		- [,,,]
+		- list[list.length] = 'barlay'
+		- do not use do notation with arrays
+		- new Array()
+	- starts with '0'
+	- concat, join, pop, push, slice, sort, splice
+	- delete array[number]
+		- leaves hole
+	- array.splice(number, 1)
+		- closes hole
+		- renumbers remaining elements
+	- arrays versus objects
+		- use objects when names are strings
+		- user arrays when names are integers
+		- there's also an associative array ????
+	- arrays are linked to Array.prototype
+	- distinguishing arrays
+		- value.constructor === Array
+		- value instanceof Array
+		- doesn't work if value is from different
+			frame ???
+	- arrays and inheritance
+		- don't use arrays as protoypes
+			- object produces does not acts as array
+		- can augment member to array
+		- can augment all arrays by assigning
+			methods to Array.prototype
+			
+part 3
+-------------------------------------------------
+
+- functions
+	- first class objects
+	- inherit from Object 
+		- not Object.prototype???
+		- can store name/value pairs???
+		
+	- function operator
+		- optional name
+		- returns function object
+		- can appear anywhere an expression can 
+			appear
+	- lambda
+		- function = lambda
+		- secure. what is???
+	- function statement
+		- function() {} == var foo = function() {};
+		- functions and vars can have same name
+	- inner functions
+		- function inside other functions
+	- scope
+		- inner function has access to variables 
+			and parameters of parent function
+		- static scoping / lexical scoping
+		- NOT dynamic scoping
+	- closure
+		- scope of inner function continues even 
+			after parent function has returned
+			
+	- example
+		- 15.toString(16) => 'F'
+		- setTimeout(function, 100)
+			- call function in 100ms 
+	
+	- function objects
+		- can contain name/value pairs
+		- serve as static members
+	
+	- method
+		- function stored in object
+		
+	- invocation
+		- ignores extra arguments
+		- missing arguments are undefined
+		- no implicit type checking on args
+		- four ways
+			- functionObject(arguments)
+			- thisObject.methodName(arguments) or
+				thisObject['methodName'](arguments)
+			- new functionObject(arguments)
+			- functionObject.apply(thisObject,
+					[arguments])
+	
+	- method form
+		- thisObject.methodName(arguments) or
+			thisObject['methodName'](arguments)
+		- _this_ is bound to object
+		
+	- function form
+		- functionObject(arguments)	
+		- this is set to global object
+		- not useful
+		- function inside method does get access to
+			method's this
+		- need to var that = this;
+		
+	- constructor form
+		- new functionObject(arguments)		
+		- a new object is created and assigned to 
+			this??? what object??? Ahh, the function
+			object
+		- this is returned if return;
+		
+	- this
+		function form - global objecct
+		method form - the object
+		constructor - new (function) object
+		
+	- arguments
+		- special parameter inside function
+		- array like - no array methods
+		- arguments.length 
+			- number of arguments passed
+			
+	- example
+		- arguments.length
+		- arguments[i]
+		
+	- i just remembered
+		function func(options){
+			options = options || {}
+		}
+	
+- augmenting built-in types
+	-	Object.prototype
+		- same for Array, Function, Number, String
+			Boolean
+	
+	- regular expression
+		this.replace(/^(.*)$/. "$1")
+		
+	- typeof var => string
+		- warning: 
+			- typeof array => 'object'
+			- typeof null  => 'object'
+			
+- eval
+	- powerful and dangerous
+	- eval(string)
+	- used by browser to convert strings to 
+		actions
+	- don't use
+	- only use eval with json
+		- can you trust your server?
+		- use parseJSON method instead
+	
+- Function function
+	- new Function(parameters, body)
+	- body string
+	- compiler produces function object
+	- don't use
+	
+- built in type wrappers
+	- avoid new Boolean() - not a boolean,  
+		avoid new String() - not a string, 
+		avoid  new Number() - not a number
+	
+- confession time
+	- no object function
+	- cannot make an object from another object
+	
+	- magic object function
+		function object(o) {
+			function F() {}
+			F.prototype = o;
+			return new F();
+		}
+		
+- augmentation
+	- use new object as prototype for lots of new
+		objects
+	- works with the grain
+		- "parasitic"
+		
+- global object
+	- object without a name
+	- container for all global variables and 
+		built in objects
+	- var global = this;
+	- window is the global object in browsers
+	- document. is faster than window.document.
+	
+- global variables are evil
+	- functions within an app can clobber each
+		other
+	- cooperating apps can clobber each other
+	- minimize use of glbal namespace
+
+- implied global
+	- any var not properly declared to be global
+		by default
+	- use jslint
+	
+- namespace
+	- every obj is a separate namespace
+	- use object to organize variables and 
+		functions
+	- YAHOO object
+	- use all upppercase name
+	- do namespaces inherit? what does that 
+		mean???
+		- namespaces are just objects, and objects
+			inherit
+	- super does not exist
+	
+- encapsulation
+	- function scope can create an encapsulation
+	- use an anonymous function to wrap your
+		application
+		
+	YAHOO.Trivia = function () {
+		// common vars, functions
+		return {
+			// private members???
+			getNextPoser: function (...) { ... },
+			showPoser: function () {... }
+		};
+	} (); // () invokes the function... like
+	
+		YAHOO.Trivia();
+
+part 4
+-------------------------------------------------
+
+- thinking about type
+	- not type safe for dynamism
+	- no cast operator
+	- reflection is really easy, 
+		usually unnecessary
+	- inheritance 
+		- automatic casting
+		- code reuse
+	- brittleness for flexibility
+	
+- date
+	- not y2k ready
+
+- RegExp
+	- patterns are enclosed in slashes
+
+- Threads
+	- has or not has them
+	- browsers do not provide it
+	- threads are evil
+
+- Platforms
+	- browsers, wsh and dashboard, yahoo!widgets
+		dreamweaver, photoshop, embedded
+		
+- ActionScript
+	- flash
+	- not compatible with javascript
+	
+- e4x
+	- xml extensions
+	- don't use e4x
+	- dead on arrival
+	
+- ecmascript
+	- last updated 1999
+	- fourth edition
+		- type declaration, classes, ...
+		- loosely typed and dynamically typed at the
+			same time
+
+- style
+	- critical
+
+- code conventions
+	- use semicolons
+	- do not break after a name, string, number,
+		or ) ] ++ --
+	- avoid tricky expressions with comma
+	- use blocks
+	- block do not have scope
+	- define all variables at beginning of 
+		function
+	- only assignment and invokation as statements
+	- avoid fallthrough in switch
+	- use === instead of ==
+	- don't use javascript: as a label
+
+- jslint
+	
+Douglas Crockford - Theory of the DOM
+=====================================
+
+part 1
+------
+
+- browser stability became the impetus for ajax
+
+- browser flow:
+	url - fetch -
+	cache -parse -
+	tree - flow - 
+	display list - paint -
+	pixels
+	
+	- fetch images while rendering text
+	
+- scripted browser
+	- flow - paint - event - script
+    ^                        |
+		+------------------------+
+		
+- script
+	- language=javascript is deprecated
+	- <!-- // --> hack
+	- src=URL
+		- don't put code on pages
+	- type=text/javascript 
+		- ignored
+	- place script tags as close to the bottom of 
+		the body as possible
+	- place css links as high in the head as
+		possible
+	- minify and gzip script files
+	- reduce number of script files as much as 
+		possible
+	- caching will be better in the future
+	
+- document.write
+	- retrospect - bad idea
+	- before onload - add stuff
+	- after onload - replace stuff
+	- not recommended
+
+- collections
+	- document.anchors, .applets, .embeds, ...
+	- avoid
+	
+- name and id
+	- name - form data
+	- id - identifies element
+	
+- document.all
+	- can access element by position, name or id	
+	- avoid it
+
+- retrieving nodes
+	- document.getElementById(id)
+		- longer
+	- document.getElementsByName(name)
+		- name is not necessarily unique
+		- returns array
+		- node.getElementsByTagName(name)
+		
+- document tree structure
+	- internet explorer tree
+		- #document (document)
+			- HTML (document.documentElement)
+				- HEAD (document.body)
+				- BODY
+					- H1
+						- #text
+	- firefox
+		- unnecessary whitespace #text
+
+- pointers	
+	- child pointers
+		- first and last
+	- sibling pointers
+		-  next and previous
+	- parent pointers
+	- pointers are maintained by system
+
+- basic pointers
+	- next sibling and first child
+	- you have a binary tree!
+	
+- walking the dom
+
+- no getElementsByClassName
+	- .className and .class? Because .class is a 
+		resolved word
+	- .className is actually an array of classes
+
+- childNodes array
+
+part 2
+------
+
+- manipulating elements
+	- old school
+		- node.property = value
+		- preferred
+	- new school
+		- my_image.getAttribute('complete')
+		- my_image.setAttribute('src', superurl)
+		- better (?)
+		
+- style
+	- node.className
+	- node.style.stylename
+		- declared, not current
+	- current
+		- node.currentStyle.styename (ie)
+		- document.defaultView... (w3c, painful)
+		
+- css and javascript properties
+	- css - dashes
+	- javascript - camelCase
+	
+- making elements
+	- document.createElement(tagname)
+	- document.createTextNode(text)
+	- node.cloneNode()
+	- node.cloneNode(true)
+		- deep
+	- not connected yet
+	
+- linking elements
+	- node.appendChild(new)
+	- node.insertBefore(new, sibling)
+	- node.replaceChild(new, old)
+	- old.parentNode.replacechild(new, old)
+	- w3c is evil
+	
+- removing elements
+	- node.removeChild(old)
+	- remove any event handlers from the object
+		before deleting it
+		
+- innerHTML
+	- need access to html parser
+	- microsoft idea
+	
+- which way is better
+	- build and link element or innerHTML
+	- clean code versus performance
+	
+- events
+	- event driven, single threaded, 
+		asynchronous
+	- event is targeted to particular node
+	- event cause invocation of event handler
+		functions
+		
+- mouse events
+	- target is topmost (z-index) node
+	
+- input events
+
+- event handlers (three ways)
+	- node['on' + type] = function - use this!
+	- node.attachEvent('on' + type)
+	- node.addEventListener(type, f, false);
+	
+- event handlers
+	- optional event parameter
+	- microsoft uses global event object
+		- wrong way to do it
+
+	function (e) {
+		e = e || event;
+		var target = 
+			e.target || e.srcElement;
+	}
+
+- trickling and bubbling
+	- trickling 
+		- avoid it
+		- top nodes get priority
+	- bubbling
+	- w3c says let's do both!
+	- false in addEventListener is for bubbling
+	
+- why bubble?
+	- can attach event handler to container of 
+		objects
+		
+- cancel bubbling
+	- don't tell my parents
+	- need to be explicit
+	
+	e.cancelBubble = true;
+	if (e.stopPropagation) {
+		e.stopPropagation();
+	}
+	
+- Prevent default action
+	- browser can prevent a browser action
+		associated with an event
+		- submitting a form
+		
+	- e.returnValue = false
+		e.preventDefault
+		return false
+		
+	- belts and suspenders - wear them all
+	
+part 3
+-------------------------------------------------
+
+- memory leaks
+	- memory management is automatic
+	- however, too much state
+	
+- IE6
+	- explicitly remove event handlers from nodes
+		before you discard them
+	- ajax applications
+	- removeChild, replaceChild
+	- replacing via innerHTML too
+	- purgeElement
+	
+- JavaScript
+	alert(text)
+		- blocks browser thread
+		- don't use with ajax
+	confirm
+	prompt
+	setTimeOut
+	setInterval
+	
+- window object == JavaScript global object
+	- aka self, top, parent
+	
+- inter-window (frames)
+	- frames[] - child frames and iframes
+	- name
+	- opener - the one who opened???
+	- self, window, parent, top
+	- open()
+		- sometimes works
+		- pop up blockers
+	- same origin policy
+		- a.yahoo.com cannot communicate with 
+			b.yahoo.com
+		- might break with ssl
+		
+- cross browser
+	- browser detection 
+		- brittle, avoid
+		- ie6 says it's mozilla 4
+	- feature detection
+		- two event handlers for one object?
+	- use library
+		- YUI
+		
+- cracks of dom
+	- skating on 5 layers of thin ice
+	- works, common, standard
+	
+- the wall
+	- reduce memory requirements
+	- sweet spot between client and server
+
+- the hole
+	- browser is not designed to be a
+		general purpose application platform
+	- lacks compositing model
+	- cooperation under mutual suspicion
+		- no way to protect two scripts from 
+			each other
+
+- the peace is ending.
+	- 4 major browsers
+		- ie, firefox, opera, safari
+			- wala pang chrome
+
+Douglas Crockford - Advanced Javascript 
+=======================================
+
+- Prototypal Inheritance
+	- class free
+	- objects inherit from objects via secret link
+	- __proto__ (the secret link, Mozilla only)
+	- if object has foo property, chain will not
+		be consulted
+	- newObject.foo and newObject['foo']
+	- Object.prototype is the root
+	- changes to old object reflects automatically
+		to new one
+	- changes to new object does not have effect
+		to oldObject
+	- no limits!
+
+- augmentation
+	- object function to produce new objects from
+		old ones
+	- can augment new objects by assigning new
+		methods and members
+		
+- pseudoclassical
+	- no object function in javascript
+	- javascript uses operators that look
+		classical but behaves prototypically
+	- three mechanisms
+		- constructor functions
+		- new operator
+		- prototype member of functions
+		
+- new operator
+	- the pseudoclassical pattern
+	- I don't understand this slide.
+	- Is this how to implement a "class" in js???
+	- Or is this how js implements new operator
+		internally???
+			
+- new operator
+	- new Constructor returns new object with link
+		to Constructor.prototype
+	- Constructor() is passed the new object in
+		the _this_ variable
+
+	- need the new operator is required when
+		calling a constructor
+		- otherwise, constructor gets the global
+			object and messes it up
+	- capitalize constructors
+	
+- prototype
+	- function object has prototype member
+	- prototype member - object containing a
+		constructor member which is a reference 
+		to... the function object (???)
+		
+	- can add other members to a function's
+		prototype
+		- will be linked to objects producted by
+			new Constructor()
+	- differential inheritance
+	
+	- method method
+		- syntantic sugar
+		- so that you don't have to see prototype
+		- good form or bad form?
+		
+	- pseudoclassical inheritance
+		- classical inheritance can be simulated
+			by assigning an object created by one
+			constructor to the prototype member of
+			another (eh???)
+		- JUST WAY TOO COMPLICATED
+		
+	- object function
+		
+		function object(o) {
+			function F() {}
+			F.prototype = o;
+			return new F();
+		}
+		

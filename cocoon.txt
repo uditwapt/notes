@@ -1,0 +1,37 @@
+https://github.com/nathanvda/cocoon
+========================================================================
+
+Rails 3.x
+---------
+
+rails g cocoon:install
+
+javascript_include_tag :cocoon
+
+
+Usage
+-----
+
+- project has many tasks
+
+- partial view for task is _task_fields.html
+
+
+- projects/_form
+
+    %h3 tasks
+    .tasks
+      = form.semantic_fields_for :tasks do |form_for_task|
+        - render 'task_fields', :f => form_for_task
+
+      .actions
+        = link_to_add_association 'Add Task',  form, :tasks
+
+
+- projects/_task_fields
+
+    .nested-fields
+      = f.inputs do
+        = f.input :description
+        = f.input :done, :as => :boolean
+        = link_to_remove_association "Remove Task", form_for_task

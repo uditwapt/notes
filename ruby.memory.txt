@@ -1,0 +1,18 @@
+http://www.theirishpenguin.com/2009/10/29/understanding-how-ruby-stores-objects-in-memory-the-ruby-heap/
+----------------------------------------------------------
+
+http://www.mikeperham.com/2009/05/25/memory-hungry-ruby-daemons/
+----------------------------------------------------------
+
+- Memory Management in Ruby
+  - one slot = one object
+  - 5 constants for managing application's heap
+    - ruby heap min slots
+    - ruby heap slots increment
+      - how many to add when full first time
+    - ruby heap slots growth factor
+      - for the second and future times
+
+
+
+

@@ -1,0 +1,75 @@
+Secure Rails Admin Backend With Authlogic and Multiple Sessions
+========================================================================
+
+* http://www.travisdunn.com/secure-rails-admin-backend-with-authlogic-and-multiple-sessions
+
+* Authlogic::Session:Id
+  - let's your user session uniquely identify itself
+  - let's you create controller filters that request certain types of sessions
+
+    map.namespace :admin do |admin|
+      admin.root :controller => 'pages', :action => 'admin'
+      admin.resource :admin_session,  :only => [:new, :create, :destroy]
+    end
+
+    class User < ActiveRecord::Base
+      acts_as_authentic do |c|
+        c.session_ids = [nil, :admin] # we probably want to replace admin with reservation
+      end
+    end
+
+    class Admin::BaseAdminController < ApplicationController
+      helper_method :current_admin_session, :current_admin
+
+      before_filter :require_admin
+
+      private
+        def current_admin_session
+          return @current_admin_session if defined?(@current_admin_session)
+          @current_admin_session = UserSession.find(:admin)
+        end
+
+        def current_admin
+          return @current_admin if defined?(@current_admin)
+          @current_admin = current_admin_session && current_admin_session.record
+        end
+
+        def require_admin
+          unless current_admin && ["admin"].include?(current_admin.role)
+            flash[:notice] = "You must be logged in to access this page"
+            redirect_to new_admin_login_url
+            return false
+          end
+        end
+    end
+
+  class Admin::AdminSessionsController < Admin::BaseAdminController
+    skip_before_filter :require_admin
+    before_filter :prepare_model, :except => [:destroy]
+
+    def new
+      render
+    end
+
+    def create
+      if @admin_session.save
+        flash[:notice] = "Login successful"
+        redirect_to admin_root_url
+      else
+        flash[:error] = "Invalid login"
+        render :action => :new
+      end
+    end
+
+    def destroy
+      current_admin_session.destroy
+      redirect_to new_admin_login_url
+    end
+
+    private
+    def prepare_model
+      params[:user_session] ||= {}
+
+      @admin_session = UserSession.new(params[:user_session])
+      @admin_session.id =:admin  end
+  End

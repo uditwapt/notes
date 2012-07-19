@@ -1,0 +1,42 @@
+http://asciicasts.com/episodes/183-gemcutter-jeweler
+========================================================================
+
+Getting set up
+------------------------------------------------------------------------
+
+- update ruby gems
+
+  sudo gem update --sytem
+
+- sudo gem install gemcutter
+
+- gem tumble
+  - add gemcutter.org to gem sources
+
+Pushing a gem
+------------------------------------------------------------------------
+
+- gem push yourgem-1.2.3.gem
+
+- create a gem in local machine
+
+  gem build name.gemspec
+
+- need gemcutter credentials
+
+- gem names must be unique across gemcutter
+
+Generating a gemspec file
+------------------------------------------------------------------------
+
+- gemspec just creates a Gem::Specification
+
+- see Gemspec reference
+  - http://docs.rubygems.org/read/chapter/20
+
+- Jeweler
+  - need to customize example Rakefile in project's homepage?
+
+
+
+

@@ -1,0 +1,250 @@
+http://kschiess.github.com/parslet/index.html
+
+about
+========================================================================
+
+* PEG - parsing expression grammar
+
+
+get started
+========================================================================
+
+* rule
+
+* match('[0-9]').repeat(1)
+  - match character in range 0 to 9, any of them, but at least one
+
+* ParseFailed
+
+* rule(:space)  { match('\s').repeat(1) }
+  - at least one space
+
+* rule(:space?) { space.maybe }
+  - space optional
+  - repeat(0, 1)
+
+* rule(:integer)    { match('[0-9]').repeat(1) >> space? }
+  - definition followed by optional space
+  - atom consumes the space right after it
+
+* rule(:sum)        { integer >> operator >> expression }
+  rule(:expression) { sum | integer }
+
+  - recursion
+  - or
+
+* begin
+    mini.parse(str)
+  rescue Parslet::ParseFailed => error
+    puts error, mini.root.error_tree
+  end
+
+* Parsing 1 + 2 + 3: "1 + 2 + 3"@0
+  - @0 is related to line number tracking
+  - See Parslet::Slice
+
+* str('ooo').as(:ex1).parse('ooo')                  # => {:ex1=>"ooo"@0}
+  - naming tokens
+
+* str('o').as(:ex2a).repeat.as(:ex2b).parse('ooo')
+  - each o is a ex2a.
+  - each group of o is a ex2b
+  - str('o').as(:ex2a) => hash
+
+* what you don't name is unimportant!
+
+* {:b=>"b"@4, :o=>"+"@2, :a=>"a"@0}
+  - @column
+
+* intermediate tree
+  - has hashes, arrays, and strings
+
+* transformations
+  class SimpleTransform < Parslet::Transform
+    rule :funcall => 'puts', :arglist => sequence(:args) do
+      "puts(#{args.inspect})"
+    end
+  end
+
+  tree = {}
+  SimpleTransform.new.apply(tree) # =>
+
+* simple(sym)
+  - simple(:int)
+
+* subtree(symn)
+  - CAUTION
+
+* transform.apply(parser.parse(string))
+
+* subtle difference between repeat(0,1) and maybe
+
+
+Overview
+========================================================================
+
+* For parsing and abstract syntax tree construction
+* LRk parsers
+  - uses lexical analyzer to transform input into tokens.
+  - can be ambiguous.
+* PEG or packrat parsers
+  - slightly more modern
+  - left recursion is impossible to express
+  - no lexers requied
+  - lexical tokenizing and parsing is done in one step.
+
+* writing a language
+  - create a grammar - legal syntax?
+  - annotate grammar - important data
+  - create transformation - how to work with data?
+
+
+Parser construction
+========================================================================
+
+* root
+  - all the same
+    SimpleParser.new.parse(string)
+    SimpleParser.new.root.parse(string)
+    SimpleParser.new.a_rule.parse(string)
+
+* str('simple_parser')
+  parser atom (parslet)
+  - inherit from Atoms::Base
+  - have one method, #parse
+
+* match('[0-9a-f]')
+  - regular expression that matches single character
+  - match['0-9a-f']
+
+* match['[:alnum:]']      # letters and numbers
+  match['\\n']            # newlines
+  match('\\w')            # word characters
+  match('.')
+
+* any == match('.')
+
+* str('foo') >> str('bar')
+  - sequence
+
+* expression.repeat
+  - 0 or more times
+  - repeat(min, max)
+
+* maybe
+  - repeat(0, 1)
+
+* str('foo').maybe.as(:f).parse('')         # => {:f=>nil} # nil
+  str('foo').repeat(0,1).as(:f).parse('')   # => {:f=>[]}  # empty array
+
+* str('foo') | str('bar')
+  - or
+
+* helper method
+
+  def spaced(character)
+    str(character) >> match["\s"]
+  end
+
+* as
+  - tree construction
+
+* str('a').repeat.as(:b)              {:b=>"aaa"@0}
+  str('a').as(:b).repeat              [{:b=>"a"@0}, {:b=>"a"@1}, {:b=>"a"@2}]
+
+
+transformation
+========================================================================
+
+* rule('a'){ 'b' }
+  - replaces all a's with b's
+  - 'a' = pattern
+  - { 'b' } - action block
+
+* engine will traverse the tree in depth-first post order.
+  - children before note.
+  - rules are tested in order they are defined. So initial rules have higher precedence?
+
+* rule(:int => simple(:x)){ Integer(x) }
+
+* rule(:int => simple(:x)) { Integer(x) }
+  rule(:op => '+', :left => simple(:l), :right => simple(:r)) { l + r }
+
+  - note that the op rule takes left and right as "simple" tokens
+
+Working with captures
+---------------------
+
+* simple(:x)
+  - will match any object BUT hashes or arrays
+  - will match other 'simple' objects like strings, integers
+
+* sequence(:x)
+  - matches an array
+  - won't match  [['a', 'b']] or  [{:a => :b}]
+
+* subtree(:x)
+  - always matches
+
+* t.rule(
+    open: {name: simple(:tag)},
+    close: {name: simple(:tag)},
+    inner: simple(:t)
+  ) { 'verified' }
+
+  - matches "matching" open and close tags.
+  - valid tree will return the word "verified"
+
+Transformation rules
+--------------------
+
+* Parslet::Transform.new { } or
+* class MyTransform < Parslet::Transform; end
+
+* cannot do this:
+  y = 12
+  rule(:foo => simple(:x)) { Integer(x) + y }
+  - because y is assumed to be a instance method of self inside the block.
+
+* this will work though
+  y = 12
+  rule(:foo => simple(:x)) { |dictionary| Integer(dictionary[:x]) + y }
+
+A word on patterns
+------------------
+
+* Cannot match a key value pair. Can only match whole hash.
+
+* With this:
+
+  { :dog => 'terrier',
+    :cat => 'suit' }
+
+  This won't work:
+
+  rule(:dog => 'terrier') { 'foo' }
+
+
+Tricks
+========================================================================
+
+* testing
+
+  ComplexParser.simple_rule.should parse('a')
+
+* error reports
+
+  begin
+    parser.parse(some_input)
+  rescue Parslet::ParseFailed => error
+    puts error, parser.root.error_tree
+  end
+
+  require 'parslet/convenience'
+  parser.parse_with_debug(input)
+
+* line numbers from parser output
+
+  # type is "int"@0
+  line, col = type.line_and_column
+  puts "Sorry. Can't have #{type} at #{line}:#{col}!"

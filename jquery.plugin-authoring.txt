@@ -1,0 +1,1567 @@
+Plugins/Authoring
+From jQuery JavaScript Library
+Jump to: navigation, search
+
+jQuery offers a mechanism for adding in methods and functionality, bundled as plugins. Most of the methods and functions included in the default download are written using the jQuery plugin construct.
+
+Plugin writing comes in two steps. The first is writing any of your public methods and functions, for example:
+
+jQuery.fn.debug = function() {
+  return this.each(function(){
+    alert(this);
+  });
+};
+jQuery.log = function(message) {
+  if(window.console) {
+     console.debug(message);
+  } else {
+     alert(message);
+  }
+};
+
+Coders will now be able to call your new plugin, like so:
+
+$("div p").debug();
+
+Or use your functions:
+
+try {
+  // do some error prone stuff
+} catch(exception) {
+  $.log(exception);
+}
+
+There are a few very important points to remember:
+
+    * Name your file jquery.[insert name of plugin].js, eg. jquery.debug.js
+    * All new methods are attached to the jQuery.fn object, all functions to the jQuery object.
+    * inside methods, 'this' is a reference to the current jQuery object.
+    * Any methods or functions you attach must have a semicolon (;) at the end - otherwise the code will break when compressed.
+    * Your method must return the jQuery object, unless explicity noted otherwise.
+    * You should use this.each to iterate over the current set of matched elements - it produces clean and compatible code that way.
+    * Always attach the plugin to jQuery directly instead of $, so users can use a custom alias via noConflict(). Read the custom alias section below for an explanation, with an elegant solution that lets you use $ internally, but attaches to the primary jQuery object. 
+
+If you're curious as to how a full plugin looks, feel free to browse the plugins or look through the jQuery Source Code.
+
+The above will suffice for small and simple plugins, but in other scenarios, a more sophisticated approach is necessary.
+Contents
+
+    * 1 Collecting static functions in objects
+    * 2 Hiding variables
+    * 3 Options
+    * 4 Using jQuery.extend to extend jQuery itself
+    * 5 Customizing animations
+    * 6 Custom Alias
+          o 6.1 Custom Alias in plugin code
+          o 6.2 Custom Alias in page code
+    * 7 Putting It All Together
+
+[edit]
+Collecting static functions in objects
+
+If you need multiple public static methods, you should add them to an object. Eg. if you start with this:
+
+jQuery.logError = function() { ... };
+jQuery.logWarning = function() { ... };
+jQuery.logDebug = function() { ... };
+
+Change it to:
+
+jQuery.log = {
+  error : function() { ... },
+  warning : function() { ... },
+  debug : function() { ... }
+};
+
+This avoids namespace cluttering and can prevent a lot of issues.
+[edit]
+Hiding variables
+
+There are different scenarios where you want to define your plugin methods in a loop, without specifying each one. Something like this:
+
+var newMethods = {
+  check       : function() { ... },
+  uncheck     : function() { ... },
+  toggleCheck : function() { ... }
+};
+jQuery.each(newMethods, function(i) {
+  jQuery.fn[i] = this;
+});
+
+To hide the variable newMethods from other code, you should wrap the code into a function that executes immediately (creating a closure for your variables):
+
+(function() {
+  var newMethods = {
+    check       : function() { ... },
+    uncheck     : function() { ... },
+    toggleCheck : function() { ... }
+  };
+  jQuery.each(newMethods, function(i) {
+    jQuery.fn[i] = this;
+  });
+})();
+
+[edit]
+Options
+
+It is good practice to design your plugin so that it can be used without having to specify lots of parameters. To make it as flexible as possible, you should provide several options with sensible defaults. Consider a plugin that always needs a URL as a parameter, and has 'name' (string), 'size' (number) and 'global' (boolean) as optional parameters. You should code your plugin like this:
+
+jQuery.fn.pluginName = function(url, options) {
+  // define defaults and override with options, if available
+  // by extending the default settings, we don't modify the argument
+  settings = jQuery.extend({
+     name: "defaultName",
+     size: 5,
+     global: true
+  }, options);
+
+  // do the rest of the plugin, using url and settings
+}
+
+You use the plugin without options like this:
+
+$('selection').pluginName('mypage.php');
+
+Or with two of three options like this:
+
+// override defaults for name and size, but not global
+var options = {
+  name: "foobar",
+  size: 10
+}
+$('selection').pluginName('mypage.php', options);
+
+
+Suggested reading: Mike Alsup has written a great plugin development pattern. Make sure you read all the comments; there's a few bugs in the example code.
+[edit]
+Using jQuery.extend to extend jQuery itself
+
+In the above section, we applied jQuery.extend(settings, options) to extend the plugin settings object. Now, by passing only one object argument instead of two or more, we change the intent of the jQuery.extend function to extend the jQuery object itself with the given object argument. This allows you to add stuff to nearly every aspect of jQuery, eg. new methods:
+
+jQuery.fn.extend({
+  check       : function() { ... },
+  uncheck     : function() { ... },
+  toggleCheck : function() { ... }
+});
+
+But you can use jQuery.extend also to extend other objects defined inside of jQuery, eg. to add new selectors:
+
+jQuery.extend(jQuery.expr[":"], {
+  text     : "a.type=='text'",
+  radio    : "a.type=='radio'",
+  checkbox : "a.type=='checkbox'"
+});
+
+[edit]
+Customizing animations
+
+Your plugin may use an animation for certain events, e.g. the tabs plugin can use fade or slide animations when the tab is changed. Making the animations customizable is quite easy when using the animate method (see the API documentation for details). The following example uses a fade as default:
+
+jQuery.fn.foobar = function(settings) {
+  settings = jQuery.extend({
+    animation: {opacity: "hide"}
+  }, settings);
+  // use the animation setting as a parameter for animate
+  jQuery(...).animate(settings.animation);
+}
+
+By passing a hash for the animation option, you could use a slide:
+
+jQuery(...).foobar({
+  animation: {height: "hide"}
+});
+
+[edit]
+Custom Alias
+
+It was stated above that you should not use the "$" alias inside your plugin code. This allows users of jQuery and your plugins to change the alias from "$" to something else like "jQ". That is necessary when working with other libraries or frameworks which make use of the "$" alias.
+
+Still, $ is a very handy shortcut, and instead of not using it, we should not rely on its existence. Instead, we can simply define our own alias (and call it "$") for our code.
+[edit]
+Custom Alias in plugin code
+
+The trick is to define all plugin code inside a function and execute this function immediately. The construct looks like this:
+
+(function() {
+  // put plugin code here
+  var xyz; // xyz is NOT a global variable, it is only visible inside this function
+})(); // execute the function immediately!
+
+The additional parentheses are necessary! You can't execute an anonymous function without them.
+
+Ok, now to the fun part:
+
+(function($) {
+  // plugin code here, use $ as much as you like
+})(jQuery);
+
+We pass "jQuery" to the function and can now use whatever alias for jQuery we like. So instead of "$" you could also use any other valid JavaScript variable name.
+[edit]
+Custom Alias in page code
+
+When writing jQuery code for the examples that illustrate the use of your plugin, you may want to consider using an alias technique to make your code more forward-compatible. Many examples of jQuery code (including examples distributed with many plugins) are written using the $ alias. This can be a problem for people using your plugin by starting to copy the example code if their web pages already use the $ alias for another purpose.
+
+To prevent this, you can nest your example code in the DOM ready event handler, which is shown below in its shorthand form. The first argument to your function can be the $ alias, which you can then use as your jQuery alias throughout the code inside the function.
+
+ jQuery(function($) {
+   // your code using $ alias here
+ });
+
+That way, you type jQuery only once and can use the alias safely inside the ready handler code. For more information, including caveats about this technique, see Using jQuery with Other Libraries.
+[edit]
+Putting It All Together
+
+Here's a short code sample that may be used as a starting point for developing your plugin.
+
+ (function($) {
+ 
+   $.fn.myPlugin = function(settings) {
+     var config = {'foo': 'bar'};
+ 
+     if (settings) $.extend(config, settings);
+ 
+     this.each(function() {
+       // element-specific code here
+     });
+ 
+     return this;
+ 
+   };
+ 
+ })(jQuery);
+
+
+Note that in this sample the "config" variable is an object used to define default settings for your plugin (eg., "{'speed': 1000}") that is extended using the "settings" object optionally passed in when the function is called.
+
+The each() method in the middle will loop over each matched item passed to your plugin by the preceding jQuery selector when your plugin is called. For example, if your plugin were called in this manner:
+
+ $('p').myPlugin();
+
+Then the each() method would loop over every paragraph tag on the page.
+
+One of the more important lines in this sample is the one that reads "return this;" after the each() method; this will ensure that the expected jQuery chaining remains intact when your plugin is called, meaning people may add methods after calling your plugin:
+
+ $('p').myPlugin({'foo': 'bar'}).fadeOut();
+
+--------------------------------------------------------------------------------
+
+A Plugin Development Pattern
+read 86 comments
+by Mike Alsup
+
+I've been developing jQuery plugins for quite a while now, and I've become rather comfortable with a particular style of plugin development for my scripts. This article is meant to share the pattern that I've found especially useful for plugin authoring. It assumes you already have an understanding of plugin development for jQuery; if you're a novice plugin author, please review the jQuery Authoring Guidelines first.
+
+There are a few requirements that I feel this pattern handles nicely:
+
+   1. Claim only a single name in the jQuery namespace
+   2. Accept an options argument to control plugin behavior
+   3. Provide public access to default plugin settings
+   4. Provide public access to secondary functions (as applicable)
+   5. Keep private functions private
+   6. Support the Metadata Plugin
+
+I'll cover these requirements one by one, and as we work through them we'll build a simple plugin which highlights text.
+Claim only a single name in the jQuery namespace
+
+This implies a single-plugin script. If your script contains multiple plugins, or complementary plugins (like $.fn.doSomething() and $.fn.undoSomething()) then you'll claim multiple names are required. But in general when authoring a plugin, strive to use only a single name to hold all of its implementation details.
+
+In our example plugin we will claim the name "hilight".
+PLAIN TEXT
+JavaScript:
+
+   1.
+      // plugin definition
+   2.
+      $.fn.hilight = function() {
+   3.
+        // Our plugin implementation code goes here.
+   4.
+      };
+
+
+And our plugin can be invoked like this:
+PLAIN TEXT
+JavaScript:
+
+   1.
+      $('#myDiv').hilight();
+
+
+But what if we need to break up our implementation into more than one function? There are many reasons to do so: the design may require it; it may result in a simpler or more readable implementation; and it may yield better OO semantics.
+
+It's really quite trivial to break up the implementation into multiple functions without adding noise to the namespace. We do this by recognizing, and taking advantage of, the fact that functions are first-class objects in JavaScript. Like any other object, functions can be assigned properties. Since we have already claimed the "hilight" name in the jQuery prototype object, any other properties or functions that we need to expose can be declared as properties on our "hilight" function. More on this later.
+Accept an options argument to control plugin behavior
+
+Let's add support to our hilight plugin for specifying the foreground and background colors to use. We should allow options like these to be passed as an options object to the plugin function. For example:
+PLAIN TEXT
+JavaScript:
+
+   1.
+      // plugin definition
+   2.
+      $.fn.hilight = function(options) {
+   3.
+        var defaults = {
+   4.
+          foreground: 'red',
+   5.
+          background: 'yellow'
+   6.
+        };
+   7.
+        // Extend our default options with those provided.
+   8.
+        var opts = $.extend(defaults, options);
+   9.
+        // Our plugin implementation code goes here.
+  10.
+      };
+
+
+Now our plugin can be invoked like this:
+PLAIN TEXT
+JavaScript:
+
+   1.
+      $('#myDiv').hilight({
+   2.
+        foreground: 'blue'
+   3.
+      });
+
+
+Provide public access to default plugin settings
+
+An improvement we can, and should, make to the code above is to expose the default plugin settings. This is important because it makes it very easy for plugin users to override/customize the plugin with minimal code. And this is where we begin to take advantage of the function object.
+PLAIN TEXT
+JavaScript:
+
+   1.
+      // plugin definition
+   2.
+      $.fn.hilight = function(options) {
+   3.
+        // Extend our default options with those provided.
+   4.
+        // Note that the first arg to extend is an empty object -
+   5.
+        // this is to keep from overriding our "defaults" object.
+   6.
+        var opts = $.extend({}, $.fn.hilight.defaults, options);
+   7.
+        // Our plugin implementation code goes here.
+   8.
+      };
+   9.
+      // plugin defaults - added as a property on our plugin function
+  10.
+      $.fn.hilight.defaults = {
+  11.
+        foreground: 'red',
+  12.
+        background: 'yellow'
+  13.
+      };
+
+
+Now users can include a line like this in their scripts:
+PLAIN TEXT
+JavaScript:
+
+   1.
+      // this need only be called once and does not
+   2.
+      // have to be called from within a 'ready' block
+   3.
+      $.fn.hilight.defaults.foreground = 'blue';
+
+
+And now we can call the plugin method like this and it will use a blue foreground color:
+PLAIN TEXT
+JavaScript:
+
+   1.
+      $('#myDiv').hilight();
+
+
+As you can see, we've allowed the user to write a single line of code to alter the default foreground color of the plugin. And users can still selectively override this new default value when they want:
+PLAIN TEXT
+JavaScript:
+
+   1.
+      // override plugin default foreground color
+   2.
+      $.fn.hilight.defaults.foreground = 'blue';
+   3.
+      // ...
+   4.
+      // invoke plugin using new defaults
+   5.
+      $('.hilightDiv').hilight();
+   6.
+      // ...
+   7.
+      // override default by passing options to plugin method
+   8.
+      $('#green').hilight({
+   9.
+        foreground: 'green'
+  10.
+      });
+
+
+Provide public access to secondary functions as applicable
+
+This item goes hand-in-hand with the previous item and is an interesting way to extend your plugin (and to let others extend your plugin). For example, the implementation of our plugin may define a function called "format" which formats the hilight text. Our plugin may now look like this, with the default implementation of the format method defined below the hilight function.
+PLAIN TEXT
+JavaScript:
+
+   1.
+      // plugin definition
+   2.
+      $.fn.hilight = function(options) {
+   3.
+        // iterate and reformat each matched element
+   4.
+        return this.each(function() {
+   5.
+          var $this = $(this);
+   6.
+          // ...
+   7.
+          var markup = $this.html();
+   8.
+          // call our format function
+   9.
+          markup = $.fn.hilight.format(markup);
+  10.
+          $this.html(markup);
+  11.
+        });
+  12.
+      };
+  13.
+      // define our format function
+  14.
+      $.fn.hilight.format = function(txt) {'
+  15.
+       return '<strong>' + txt + '</strong>';
+  16.
+      };
+
+
+We could have just as easily supported another property on the options object that allowed a callback function to be provided to override the default formatting. That's another excellent way to support customization of your plugin. The technique shown here takes this a step further by actually exposing the format function so that it can be redefined. With this technique it would be possible for others to ship their own custom overrides of your plugin נin other words, it means others can write plugins for your plugin.
+
+Considering the trivial example plugin we're building in this article, you may be wondering when this would ever be useful. One real-world example is the Cycle Plugin. The Cycle Plugin is a slideshow plugin which supports a number of built-in transition effects נscroll, slide, fade, etc. But realistically, there is no way to define every single type of effect that one might wish to apply to a slide transition. And that's where this type of extensibility is useful. The Cycle Plugin exposes a "transitions" object to which users can add their own custom transition definitions. It's defined in the plugin like this:
+PLAIN TEXT
+JavaScript:
+
+   1.
+      $.fn.cycle.transitions = {
+   2.
+       // ...
+   3.
+      };
+
+
+This technique makes it possible for others to define and ship transition definitions that plug-in to the Cycle Plugin.
+Keep private functions private
+
+The technique of exposing part of your plugin to be overridden can be very powerful. But you need to think carefully about what parts of your implementation to expose. Once it's exposed, you need to keep in mind that any changes to the calling arguments or semantics may break backward compatibility. As a general rule, if you're not sure whether to expose a particular function, then you probably shouldn't.
+
+So how then do we define more functions without cluttering the namespace and without exposing the implementation? This is a job for closures. To demonstrate, we'll add another function to our plugin called "debug". The debug function will log the number of selected elements to the Firebug console. To create a closure, we wrap the entire plugin definition in a function (as detailed in the jQuery Authoring Guidelines).
+PLAIN TEXT
+JavaScript:
+
+   1.
+      // create closure
+   2.
+      (function($) {
+   3.
+        // plugin definition
+   4.
+        $.fn.hilight = function(options) {
+   5.
+          debug(this);
+   6.
+          // ...
+   7.
+        };
+   8.
+        // private function for debugging
+   9.
+        function debug($obj) {
+  10.
+          if (window.console && window.console.log)
+  11.
+            window.console.log('hilight selection count: ' + $obj.size());
+  12.
+        };
+  13.
+       //  ...
+  14.
+      // end of closure
+  15.
+      })(jQuery);
+
+
+Our "debug" method cannot be accessed from outside of the closure and thus is private to our implementation.
+Support the Metadata Plugin
+Depending on the type of plugin you're writing, adding support for the Metadata Plugin can make it even more powerful. Personally, I love the Metadata Plugin because it lets you use unobtrusive markup to override plugin options (which is particularly useful when creating demos and examples). And supporting it is very simple!
+
+Update: This bit was optimized per suggestion in the comments.
+PLAIN TEXT
+JavaScript:
+
+   1.
+      // plugin definition
+   2.
+      $.fn.hilight = function(options) {
+   3.
+        // ...
+   4.
+        // build main options before element iteration
+   5.
+        var opts = $.extend({}, $.fn.hilight.defaults, options);
+   6.
+        return this.each(function() {
+   7.
+          var $this = $(this);
+   8.
+          // build element specific options
+   9.
+          var o = $.meta ? $.extend({}, opts, $this.data()) : opts;
+  10.
+          //...
+
+
+This changed line does a couple of things:
+
+    * it tests to see if the Metadata Plugin is installed
+    * if it is installed, it extends our options object with the extracted metadata.
+
+This line is added as the last argument to jQuery.extend so it will override any other option settings. Now we can drive behavior from the markup if we choose:
+
+<!--  markup  -->
+<div class="hilight { background: 'red', foreground: 'white' }">
+  Have a nice day!
+</div>
+<div class="hilight { foreground: 'orange' }">
+  Have a nice day!
+</div>
+<div class="hilight { background: 'green' }">
+  Have a nice day!
+</div>
+
+And now we can hilight each of these divs uniquely using a single line of script:
+PLAIN TEXT
+JavaScript:
+
+   1.
+      $('.hilight').hilight();
+
+
+Putting it All Together
+
+Below is the completed code for our example:
+PLAIN TEXT
+JavaScript:
+
+   1.
+      //
+   2.
+      // create closure
+   3.
+      //
+   4.
+      (function($) {
+   5.
+        //
+   6.
+        // plugin definition
+   7.
+        //
+   8.
+        $.fn.hilight = function(options) {
+   9.
+          debug(this);
+  10.
+          // build main options before element iteration
+  11.
+          var opts = $.extend({}, $.fn.hilight.defaults, options);
+  12.
+          // iterate and reformat each matched element
+  13.
+          return this.each(function() {
+  14.
+            $this = $(this);
+  15.
+            // build element specific options
+  16.
+            var o = $.meta ? $.extend({}, opts, $this.data()) : opts;
+  17.
+            // update element styles
+  18.
+            $this.css({
+  19.
+              backgroundColor: o.background,
+  20.
+              color: o.foreground
+  21.
+            });
+  22.
+            var markup = $this.html();
+  23.
+            // call our format function
+  24.
+            markup = $.fn.hilight.format(markup);
+  25.
+            $this.html(markup);
+  26.
+          });
+  27.
+        };
+  28.
+        //
+  29.
+        // private function for debugging
+  30.
+        //
+  31.
+        function debug($obj) {
+  32.
+          if (window.console && window.console.log)
+  33.
+            window.console.log('hilight selection count: ' + $obj.size());
+  34.
+        };
+  35.
+        //
+  36.
+        // define and expose our format function
+  37.
+        //
+  38.
+        $.fn.hilight.format = function(txt) {
+  39.
+          return '<strong>' + txt + '</strong>';
+  40.
+        };
+  41.
+        //
+  42.
+        // plugin defaults
+  43.
+        //
+  44.
+        $.fn.hilight.defaults = {
+  45.
+          foreground: 'red',
+  46.
+          background: 'yellow'
+  47.
+        };
+  48.
+      //
+  49.
+      // end of closure
+  50.
+      //
+  51.
+      })(jQuery);
+
+
+This design pattern has enabled me to create powerful, consistently crafted plugins. I hope it helps you to do the same.
+
+--------------------------------------------------------------------------------
+
+Turn your jQuery code into a richer, unit testable, plugin
+
+Posted on: Sunday, September 28th, 2008 at 9:07 pm
+On this page:
+
+   1. Make most of your jQuery code into reusable plugins
+         1. Example to create a dynamic side note toggler
+         2. As a simple jQuery plugin
+   2. Use the jQuery plugin development pattern for added flexibility
+   3. Unit testing the jQuery plugin
+         1. Examples of unit tests for this plugin
+         2. Use QUnit to unit test JavaScript
+   4. Using unit tests and plugins helps create a richer API for the plugin
+         1. Triggering events on the plugin for added flexibility
+         2. Providing default implementations that can be replaced (or mocked for unit testing)
+         3. Example QUnit test code
+         4. Final plugin code
+         5. Is the additional lines of code for a plugin worth it?
+   5. Summary
+
+I find myself increasingly using jQuery as my JavaScript framework of choice.
+
+It’s by-line of “write less, do more” really seems apt.
+
+But sometimes, by writing just that little bit extra, you can do even more.
+
+For example, I often try to do the following:
+
+    * Make most jQuery code into reusable plugins
+    * Use the jQuery plugin development pattern for added flexibility
+    * Use QUnit to unit test JavaScript
+    * Combine the two approaches to drive out a richer API for the plugin
+
+By unit testing with QUnit, I find I often need to trigger additional events or add additional code from within the plugin so the test can be meaningful.
+
+But this extra code isn’t only useful for testing, it becomes a useful part of the plugin’s API, improving its functionality and flexibility without sacrificing maintainability and readability of the code.
+
+I’ll try to demonstrate that in this post.
+Make most of your jQuery code into reusable plugins
+
+In many cases, where there is a block of jQuery code initializing something, it is a candidate for a plugin.
+
+It took me a little while before I gave jquery plugins a go, thinking it will be complex and I won’t have time. But, it turns out to be really simple, elegant and useful for both simple and complicated scenarios.
+Example to create a dynamic side note toggler
+
+Lets take a simple example for illustration: suppose I have some HTML that acts as an aside, or side note, and that I want to toggle its appearance.
+
+Lets say we agree this kind of HTML format for it (or microformat):
+view plaincopy to clipboardprint?
+
+   1.
+      <p>Some text before the side note.</p> 
+   2.
+       
+   3.
+      <div class="side-note"> 
+   4.
+          <p>Any HTML could go here including</p> 
+   5.
+          <ul> 
+   6.
+              <li>Bulleted lists</li> 
+   7.
+              <li>Tabular data</li> 
+   8.
+              <li>Images</li> 
+   9.
+          </ul> 
+  10.
+       
+  11.
+          <div class="side-note"> 
+  12.
+              <p>Even nested side notes, if that is of any use!</p> 
+  13.
+          </div> 
+  14.
+      </div> 
+  15.
+       
+  16.
+      <p>Some text after the side note.</p>  
+
+<p>Some text before the side note.</p>
+
+<div class="side-note">
+	<p>Any HTML could go here including</p>
+	<ul>
+		<li>Bulleted lists</li>
+		<li>Tabular data</li>
+		<li>Images</li>
+	</ul>
+
+	<div class="side-note">
+		<p>Even nested side notes, if that is of any use!</p>
+	</div>
+</div>
+
+<p>Some text after the side note.</p>
+
+The first way I’d do it might be something like this:
+view plaincopy to clipboardprint?
+
+   1.
+      $(document).ready(function() { 
+   2.
+          $('.side-note').each(function() { 
+   3.
+              $(this) 
+   4.
+                  .addClass('dynamic-side-note') 
+   5.
+                  .hide() 
+   6.
+                  .wrap('<div class="dynamic-side-note-container"></div>') 
+   7.
+                  .before('<h3 class="toggler"><a href="#">Side note:</a></h3>') 
+   8.
+                  .parent(0).find('> h3.toggler > a').click(function() { 
+   9.
+                      $(this).parents('.dynamic-side-note-container').eq(0).find('> .dynamic-side-note').slideToggle(); 
+  10.
+                      return false; 
+  11.
+                  }); 
+  12.
+          }); 
+  13.
+      });  
+
+$(document).ready(function() {
+    $('.side-note').each(function() {
+        $(this)
+            .addClass('dynamic-side-note')
+            .hide()
+            .wrap('<div class="dynamic-side-note-container"></div>')
+            .before('<h3 class="toggler"><a href="#">Side note:</a></h3>')
+            .parent(0).find('> h3.toggler > a').click(function() {
+                $(this).parents('.dynamic-side-note-container').eq(0).find('> .dynamic-side-note').slideToggle();
+                return false;
+            });
+    });
+});
+
+I could have added a click event handler to the h3 header above, but using an anchor adds keyboard accessibility.
+
+(The CSS selector could also be improved, e.g. to narrow it down to only side-notes in some content div, e.g. $('#content .side-note').)
+
+Here is a working example
+As a simple jQuery plugin
+
+The above works. But, we can move most of the above code into a jQuery plugin.
+
+Why bother? We can gain a bit more flexibility, such as the ability to use any selector, not rely on a side-note class. We could pass in other parameters such as what the text for the side note toggler/header should be, etc.
+
+As a first attempt, the plugin might look something like this:
+view plaincopy to clipboardprint?
+
+   1.
+      $.fn.sideNotes = function() { 
+   2.
+          // returning this way allows chaining 
+   3.
+          return $(this) 
+   4.
+              .addClass('dynamic-side-note') 
+   5.
+              .hide() 
+   6.
+              .wrap('<div class="dynamic-side-note-container"></div>') 
+   7.
+              .before('<h3 class="toggler"><a href="#">Side note:</a></h3>') 
+   8.
+              .parent(0).find('> h3.toggler > a').click(function() { 
+   9.
+                  $(this).parents('.dynamic-side-note-container').eq(0).find('> .dynamic-side-note').slideToggle(); 
+  10.
+                  return false; 
+  11.
+              }); 
+  12.
+      };  
+
+$.fn.sideNotes = function() {
+    // returning this way allows chaining
+    return $(this)
+        .addClass('dynamic-side-note')
+        .hide()
+        .wrap('<div class="dynamic-side-note-container"></div>')
+        .before('<h3 class="toggler"><a href="#">Side note:</a></h3>')
+        .parent(0).find('> h3.toggler > a').click(function() {
+            $(this).parents('.dynamic-side-note-container').eq(0).find('> .dynamic-side-note').slideToggle();
+            return false;
+        });
+};
+
+We then just need to invoke the plugin:
+view plaincopy to clipboardprint?
+
+   1.
+      jQuery(function() { 
+   2.
+          $('.side-note').sideNotes(); 
+   3.
+      });  
+
+jQuery(function() {
+    $('.side-note').sideNotes();
+});
+
+(Note how you could use any selector now not just .side-note as above.)
+
+Here is a working example using the simple plugin
+
+Plugins also make it easier to pass in more options for configuration. The next example uses a useful pattern for plugin development that also shows a nice way to handle plugin options:
+Use the jQuery plugin development pattern for added flexibility
+
+The post, A Plugin Development Pattern (for jQuery), from the Learning jQuery blog is really useful.
+
+It provides a good way to write plugins that also get the following features:
+
+    * Configurability by passing in options
+    * Default options to keep invoking code small and neat
+    * A closure where you split your code out into manageable private functions, etc., if you need
+    * Ensuring that your plugin support chaining
+    * And more
+
+Using some of those ideas, here is what we might come up with for the sideNotes plugin:
+view plaincopy to clipboardprint?
+
+   1.
+      (function($) { 
+   2.
+          $.fn.sideNotes = function(options) { 
+   3.
+       
+   4.
+          // build main options before element iteration by extending the default ones 
+   5.
+          var opts = $.extend({}, $.fn.sideNotes.defaults, options); 
+   6.
+       
+   7.
+          // for each side note, do the magic. 
+   8.
+          return $(this) 
+   9.
+              .hide() 
+  10.
+              .wrap('<div class="dynamic-side-note"></div>') 
+  11.
+              .before('<h3 class="toggler"><a href="#">' + opts.sideNoteToggleText +'</a></h3>') 
+  12.
+              .parent(0).find('> h3.toggler > a').click(function() { 
+  13.
+                  $(this).parents('.dynamic-side-note').eq(0).find('> .side-note').slideToggle(); 
+  14.
+                  return false; 
+  15.
+              }); 
+  16.
+          }; 
+  17.
+       
+  18.
+          // plugin defaults 
+  19.
+          $.fn.sideNotes.defaults = { 
+  20.
+              sideNoteToggleText : 'Side note:' 
+  21.
+          }; 
+  22.
+      })(jQuery);  
+
+(function($) {
+    $.fn.sideNotes = function(options) {
+
+    // build main options before element iteration by extending the default ones
+    var opts = $.extend({}, $.fn.sideNotes.defaults, options);
+
+    // for each side note, do the magic.
+    return $(this)
+        .hide()
+        .wrap('<div class="dynamic-side-note"></div>')
+        .before('<h3 class="toggler"><a href="#">' + opts.sideNoteToggleText +'</a></h3>')
+        .parent(0).find('> h3.toggler > a').click(function() {
+            $(this).parents('.dynamic-side-note').eq(0).find('> .side-note').slideToggle();
+            return false;
+        });
+    };
+
+    // plugin defaults
+    $.fn.sideNotes.defaults = {
+        sideNoteToggleText : 'Side note:'
+    };
+})(jQuery);
+
+And invoking the plugin is the same as before:
+view plaincopy to clipboardprint?
+
+   1.
+      jQuery(function() { 
+   2.
+          $('.side-note').sideNotes(); 
+   3.
+       
+   4.
+          // or overriding the default side note toggle text: 
+   5.
+          // $('.side-note').sideNotes({ sideNoteToggleText : 'As an aside:' }); 
+   6.
+      });  
+
+jQuery(function() {
+    $('.side-note').sideNotes();
+
+    // or overriding the default side note toggle text:
+    // $('.side-note').sideNotes({ sideNoteToggleText : 'As an aside:' });
+});
+
+Here is a working example using the plugin pattern
+Unit testing the jQuery plugin
+
+As the plugin code is reasonably well encapsulated, we can create some unit tests for this plugin.
+
+Unit testing jQuery (as with any code) gives you confidence in maintaining it. For example, when refactoring code, unit tests give you confidence that you can do it without breaking things. Plugins, almost by definition are good candidates for unit testing.
+Examples of unit tests for this plugin
+
+Our example side note plugin is quite simple, so the unit tests will likely be small in number. Types of tests we might include are the following:
+
+    * Test that we can expand/collapse a side note
+    * Test that we can expand/collapse a side note many times and ensure the toggle state reported is correct each time
+    * Test that when the side note plugin has run, all the side notes are collapsed initially
+    * Test that we can change the toggle text to something else
+
+And so on.
+
+Remember, the unit tests should not test the slideToggle() method we happened to use (as that should be unit tested itself, and we may use other ways of toggling the side note in the future). Instead, we just need to unit test our code and plugin functionality.
+
+So ideally, we might even want to “mock” the slideToggle(), if necessary.
+Use QUnit to unit test JavaScript
+
+QUnit is a unit testing framework, used internally by jQuery itself for all its core JavaScript, and now opened up and documented for others to use, too. It is a simple framework to support the creation and execution of tests.
+
+The tests are run in a browser. You could automate it against all your target browsers by using something like Selenium.
+
+The framework is in its early days (a setup and teardown set of methods would be nice, for example), but is rich enough to get started with it.
+
+Here is a QUnit test page for the side note plugin
+
+(I included a manual test area as this can sometimes be useful where visual confirmation is useful or automated tests of some parts is not possible/easy. Having this all in one place can be handy.)
+Using unit tests and plugins helps create a richer API for the plugin
+
+To write testable code, you may find you need to provide more hooks in the code. Yet, you probably don’t want to pollute your code so much that it is detrimental to performance or maintainability.
+Triggering events on the plugin for added flexibility
+
+In the unit test example page, how did we manage to get unit tests to confirm a side note had been toggled when we didn’t have any callback for it?
+
+The first idea people might have is to pass a callback that a plugin user can point to in the options when invoking the plugin, something like this:
+view plaincopy to clipboardprint?
+
+   1.
+      jQuery(function() { 
+   2.
+          $('.side-note').sideNotes( 
+   3.
+              { 
+   4.
+                  toggled : function() { console.log('side note was toggled'); } 
+   5.
+              } 
+   6.
+          ); 
+   7.
+      });  
+
+jQuery(function() {
+    $('.side-note').sideNotes(
+        {
+            toggled : function() { console.log('side note was toggled'); }
+        }
+    );
+});
+
+That looks useful; the unit test can provide a callback when it invokes the plugin.
+
+However, that limits us to just one observer, the one that invoked the side note plugin in the first place.
+
+But we can go one step further: trigger events. This allows more than one observer to watch for the event. This is achieved using jQuery’s trigger() and bind() methods.
+
+By having unit tests watching for these events, it does not distort the plugin code; it enhances its API making the event useful for a real plugin user, if they need it.
+
+In our side note plugin example, when we call slideToggle() we can trigger an event when the toggling has completed:
+view plaincopy to clipboardprint?
+
+   1.
+      // all the stuff that gets to the 
+   2.
+      // slide toggle bit comes here! 
+   3.
+      .slideToggle( function() { 
+   4.
+          $(this).trigger('sideNoteToggled'); 
+   5.
+      });  
+
+// all the stuff that gets to the
+// slide toggle bit comes here!
+.slideToggle( function() {
+    $(this).trigger('sideNoteToggled');
+});
+
+If your code cares when this happens, you can bind to this event, something like this:
+view plaincopy to clipboardprint?
+
+   1.
+      $('.side-note').bind('sideNoteToggled', eventHandlerGoesHere);  
+
+$('.side-note').bind('sideNoteToggled', eventHandlerGoesHere);
+
+(A fuller example below uses trigger() to also pass the expanded/collapsed state in conjunction with some ARIA information.)
+Providing default implementations that can be replaced (or mocked for unit testing)
+
+One particular challenge I had with unit testing this side note example was that the slideToggle() method used by the plugin, internally runs asynchronously (using setTimeout etc).
+
+Writing normal unit test code means the test can finish before the animation has run.
+
+Even though I tried to use setTimeout() on the tests themselves to try and make them wait for the sideNote to finish toggling, and passing in the fastest speed possible to the slideToggle method, it wasn’t always right, and not consistent across all browsers.
+
+This gave me the opportunity to do a few things:
+
+    * Encapsulate the call to slideToggle in another method
+    * Make that method the default implementation, but overrideable
+    * Use this to provide a mock slide toggler for testing purposes
+
+With jQuery’s plugin architecture providing a default implementation is quite straight forward:
+view plaincopy to clipboardprint?
+
+   1.
+      $.fn.sideNotes.toggle = function() { 
+   2.
+          $(this).slideToggle(function() { 
+   3.
+              $(this).trigger('sideNoteToggled'); 
+   4.
+          }); 
+   5.
+      };  
+
+$.fn.sideNotes.toggle = function() {
+    $(this).slideToggle(function() {
+        $(this).trigger('sideNoteToggled');
+    });
+};
+
+Mocking the slideToggle() call is nice because we don’t want to test external code in our unit tests; that should have been unit tested by whoever wrote that (the jQuery team I imagine! I’ll have to look at their unit tests when I get a moment to see how they overcome asynchronous issue — there is some mechanism to provide stop() and start() methods for AJAX testing and I tried this here, but still wasn’t getting consistent results).
+
+In our example, we can overwrite the the default toggle method to simply use toggle() instead of slideToggle(), which is a non-animated version that runs and completes immediately.
+
+This makes writing the testing code a bit simpler too. (There are one or two bits that I did that didn’t feel too great in my opinion, such as the way I chose to expose the post toggle action, but that is perhaps for another day to sort out!)
+
+To override the default implementation, you can redefine sideNotes.toggle in your code, something like this:
+view plaincopy to clipboardprint?
+
+   1.
+      $.fn.sideNotes.toggle = function() { 
+   2.
+          $(this).toggle().trigger('sideNoteToggled'); 
+   3.
+      };  
+
+$.fn.sideNotes.toggle = function() {
+    $(this).toggle().trigger('sideNoteToggled');
+};
+
+Example QUnit test code
+
+So taking the above considerations this is what we might have in our QUnit unit test code:
+
+This code block shows a test util object to help instrument the test, and then at the bottom, an example of a mock object to replace the slideToggle() call.
+view plaincopy to clipboardprint?
+
+   1.
+      (function(){ 
+   2.
+          var testUtils = { 
+   3.
+              isExpandedCount : 0, 
+   4.
+              isCollapsedCount : 0, 
+   5.
+       
+   6.
+              defaultTestOptions : { 
+   7.
+                  selector : '#example .side-note', 
+   8.
+                  sideNoteOptions : {}, 
+   9.
+                  speed : 'fast' 
+  10.
+              }, 
+  11.
+       
+  12.
+              // a crude setup like method, which QUnit currently doesn't have 
+  13.
+              init : function(options) { 
+  14.
+                  testUtils.reset(); 
+  15.
+       
+  16.
+                  var opts = $.extend({ sideNoteOptions : {} }, testUtils.defaultTestOptions, options); 
+  17.
+       
+  18.
+                  // tests assume the relevant HTML is present on the page the test is running 
+  19.
+                  $(opts.selector) 
+  20.
+                      .bind('sideNoteToggled', testUtils.sideNoteToggled) 
+  21.
+                          .sideNotes(opts.sideNoteOptions); 
+  22.
+       
+  23.
+                  return $(opts.selector); 
+  24.
+              }, 
+  25.
+       
+  26.
+              sideNoteToggled : function(event, isExpanded) { 
+  27.
+                  isExpanded ? testUtils.isExpandedCount++ : testUtils.isCollapsedCount++; 
+  28.
+       
+  29.
+                  $(event.target).trigger('sideNoteToggleCaptured'); 
+  30.
+              }, 
+  31.
+       
+  32.
+              // until there is an explicit tear down method this will have to do 
+  33.
+              reset : function() { 
+  34.
+                  $('#example .side-note').unbind('sideNoteToggled'); 
+  35.
+                  testUtils.isExpandedCount = 0; 
+  36.
+                  testUtils.isCollapsedCount = 0; 
+  37.
+              } 
+  38.
+          }; 
+  39.
+       
+  40.
+          // mock the slideToggle. We are not testing that. 
+  41.
+          function mockSideNoteToggle() { 
+  42.
+              $(this).toggle(); 
+  43.
+       
+  44.
+              $.fn.sideNotes.toggled.call(this); 
+  45.
+          } 
+  46.
+       
+  47.
+          // keep the original implementation if we want to use it later 
+  48.
+          $.fn.sideNotes.originalToggler = $.fn.sideNotes.toggle; 
+  49.
+       
+  50.
+          // override the default toggle method with the mock 
+  51.
+          $.fn.sideNotes.toggle = mockSideNoteToggle; 
+  52.
+      })();  
+
+(function(){
+    var testUtils = {
+        isExpandedCount : 0,
+        isCollapsedCount : 0,
+
+        defaultTestOptions : {
+            selector : '#example .side-note',
+            sideNoteOptions : {},
+            speed : 'fast'
+        },
+
+        // a crude setup like method, which QUnit currently doesn't have
+        init : function(options) {
+            testUtils.reset();
+
+            var opts = $.extend({ sideNoteOptions : {} }, testUtils.defaultTestOptions, options);
+
+            // tests assume the relevant HTML is present on the page the test is running
+            $(opts.selector)
+                .bind('sideNoteToggled', testUtils.sideNoteToggled)
+                    .sideNotes(opts.sideNoteOptions);
+
+            return $(opts.selector);
+        },
+
+        sideNoteToggled : function(event, isExpanded) {
+            isExpanded ? testUtils.isExpandedCount++ : testUtils.isCollapsedCount++;
+
+            $(event.target).trigger('sideNoteToggleCaptured');
+        },
+
+        // until there is an explicit tear down method this will have to do
+        reset : function() {
+            $('#example .side-note').unbind('sideNoteToggled');
+            testUtils.isExpandedCount = 0;
+            testUtils.isCollapsedCount = 0;
+        }
+    };
+
+    // mock the slideToggle. We are not testing that.
+    function mockSideNoteToggle() {
+        $(this).toggle();
+
+        $.fn.sideNotes.toggled.call(this);
+    }
+
+    // keep the original implementation if we want to use it later
+    $.fn.sideNotes.originalToggler = $.fn.sideNotes.toggle;
+
+    // override the default toggle method with the mock
+    $.fn.sideNotes.toggle = mockSideNoteToggle;
+})();
+
+We can then write unit tests, such as this one (note this code would go inside the anonymous function used above):
+view plaincopy to clipboardprint?
+
+   1.
+      module("Single toggle tests"); 
+   2.
+       
+   3.
+      test("Test side note is expanded when toggled", function() { 
+   4.
+          var $sideNote = testUtils.init(); 
+   5.
+       
+   6.
+          $sideNote.each(function() { 
+   7.
+              equals($(this).attr('aria-expanded'), 'false', "Side not starts as collapsed"); 
+   8.
+          }); 
+   9.
+       
+  10.
+          $('#example') 
+  11.
+              .find('.side-note:eq(0)').bind('sideNoteToggleCaptured', function() { 
+  12.
+                  equals(testUtils.isExpandedCount, 1, "A node has been expanded"); 
+  13.
+                  equals(testUtils.isCollapsedCount, 0, "No nodes have been collapsed after initialization"); 
+  14.
+                  equals(this['aria-expanded'], true, "Node’s aria state is expanded"); 
+  15.
+              }) 
+  16.
+              .end() 
+  17.
+                  .find('.toggler > a:eq(0)').click(); 
+  18.
+                  // calling click() is like simulating the user action to start the test 
+  19.
+      });  
+
+module("Single toggle tests");
+
+test("Test side note is expanded when toggled", function() {
+    var $sideNote = testUtils.init();
+
+    $sideNote.each(function() {
+        equals($(this).attr('aria-expanded'), 'false', "Side not starts as collapsed");
+    });
+
+    $('#example')
+        .find('.side-note:eq(0)').bind('sideNoteToggleCaptured', function() {
+            equals(testUtils.isExpandedCount, 1, "A node has been expanded");
+            equals(testUtils.isCollapsedCount, 0, "No nodes have been collapsed after initialization");
+            equals(this['aria-expanded'], true, "Node’s aria state is expanded");
+        })
+        .end()
+            .find('.toggler > a:eq(0)').click();
+            // calling click() is like simulating the user action to start the test
+});
+
+In the above example, the following is happening:
+
+   1. The call to init() creates/initializes the sideNote plugin
+   2. We then assert that the ARIA state reports each side note is not expanded
+   3. We then find each side note and bind to the sideNoteToggleCaptured event (which is raised by the unit test utility shown earlier, not by the plugin itself)
+   4. We then simulate a user action by finding the toggler and clicking it
+   5. The simulated click() makes the plugin eventually trigger the sideNoteToggled event, which the testUtils object will catch.
+   6. The test util will catch that event and update the various testing counters and itself trigger the sideNoteToggleCaptured event.
+   7. Finally at this point, we can run our assertions, such as confirming the expected number of times the side note was expanded/collapsed and what the expected ARIA state should be (in this example seen by the use of the equals() function).
+
+See the full example for more unit tests
+
+The additional tests in the full example also show the side note being dynamically created per test run, so you don’t always have to have the HTML set up exactly as needed for every test, manually.
+
+The unit test code in that example can probably be further improved by refactoring those test() functions into a helper function where you pass in callbacks to run when the test has completed, how many clicks you want to invoke, etc, but that is for another time!
+Final plugin code
+
+Here is the final plugin code (with some additional options not discussed above):
+view plaincopy to clipboardprint?
+
+   1.
+      (function($) { 
+   2.
+          $.fn.sideNotes = function(options) { 
+   3.
+       
+   4.
+              // build main options before element iteration 
+   5.
+              var opts = $.extend({}, $.fn.sideNotes.defaults, options); 
+   6.
+       
+   7.
+              // iterate and process each matched element 
+   8.
+              return $(this) 
+   9.
+                  .addClass('dynamic-side-note').hide() 
+  10.
+                  .attr('aria-expanded', false) 
+  11.
+                  .wrap('<div class="dynamic-side-note-container"></div>') 
+  12.
+                  .before('<' + opts.toggleElement + '><a class="toggler" href="#">' + opts.sideNoteToggleText +'</a></' + opts.toggleElement + '>') 
+  13.
+                  .parent(0) 
+  14.
+                      .find(opts.toggleElement + '.toggler > a') 
+  15.
+                          .click(doToggle); 
+  16.
+       
+  17.
+              // example of private method 
+  18.
+              function doToggle() { 
+  19.
+                  $(this) 
+  20.
+                      .parents('.dynamic-side-note-container').eq(0) 
+  21.
+                          .find('> .dynamic-side-note').each( function() { 
+  22.
+                              $.fn.sideNotes.toggle.call(this, options); 
+  23.
+                          }); 
+  24.
+       
+  25.
+                  return false; 
+  26.
+              } 
+  27.
+          }; 
+  28.
+       
+  29.
+          // plugin defaults 
+  30.
+          $.fn.sideNotes.defaults = { 
+  31.
+              sideNoteToggleText : 'Side note:', 
+  32.
+              speed : 'normal', 
+  33.
+              toggleElement : 'h3' 
+  34.
+          }; 
+  35.
+       
+  36.
+          // default implementation for the toggler (public. i.e. overrideable) 
+  37.
+          $.fn.sideNotes.toggle = function(options) { 
+  38.
+              $(this).slideToggle(options.speed, $.fn.sideNotes.toggled); 
+  39.
+          }; 
+  40.
+       
+  41.
+          // default callback when toggle completed (public. i.e. overrideable) 
+  42.
+          $.fn.sideNotes.toggled = function() { 
+  43.
+              this['aria-expanded'] = this['aria-expanded'] === true ? false : true; 
+  44.
+       
+  45.
+              $(this).trigger('sideNoteToggled', this['aria-expanded']); 
+  46.
+          }; 
+  47.
+      })(jQuery);  
+
+(function($) {
+    $.fn.sideNotes = function(options) {
+
+        // build main options before element iteration
+        var opts = $.extend({}, $.fn.sideNotes.defaults, options);
+
+        // iterate and process each matched element
+        return $(this)
+            .addClass('dynamic-side-note').hide()
+            .attr('aria-expanded', false)
+            .wrap('<div class="dynamic-side-note-container"></div>')
+            .before('<' + opts.toggleElement + '><a class="toggler" href="#">' + opts.sideNoteToggleText +'</a></' + opts.toggleElement + '>')
+            .parent(0)
+                .find(opts.toggleElement + '.toggler > a')
+                    .click(doToggle);
+
+        // example of private method
+        function doToggle() {
+            $(this)
+                .parents('.dynamic-side-note-container').eq(0)
+                    .find('> .dynamic-side-note').each( function() {
+                        $.fn.sideNotes.toggle.call(this, options);
+                    });
+
+            return false;
+        }
+    };
+
+    // plugin defaults
+    $.fn.sideNotes.defaults = {
+        sideNoteToggleText : 'Side note:',
+        speed : 'normal',
+        toggleElement : 'h3'
+    };
+
+    // default implementation for the toggler (public. i.e. overrideable)
+    $.fn.sideNotes.toggle = function(options) {
+        $(this).slideToggle(options.speed, $.fn.sideNotes.toggled);
+    };
+
+    // default callback when toggle completed (public. i.e. overrideable)
+    $.fn.sideNotes.toggled = function() {
+        this['aria-expanded'] = this['aria-expanded'] === true ? false : true;
+
+        $(this).trigger('sideNoteToggled', this['aria-expanded']);
+    };
+})(jQuery);
+
+Is the additional lines of code for a plugin worth it?
+
+The plugin used in the unit tested example is larger in terms of lines of code than the very first attempt, above.
+
+In this case, the lines of code is still quite small, and as plugins get even larger the percentage difference is likely to be small (the size difference is more noticeable in smaller code samples, such as this contrived side note example).
+
+Minimizing and gzipping JavaScript, plus using far future expires header for better caching would further reduce the percentage difference in file sizes of the two approaches.
+
+Depending on your needs, this may be a reasonable trade-off in return for additional flexibility.
+Summary
+
+So, in many cases, jQuery code can be made reusable by making it into a plugin. Any time you find yourself writing a block of code, say inside a $(document).ready() block, consider converting it into a plugin and calling it.
+
+When making the plugin, consider the following:
+
+    * Provide various options for flexibility
+    * Write unit tests to test your plugin
+    * Trigger important events inside your plugin to aide unit testability, and in doing so, increase flexibility of your plugin even more.
+
+When you get the hang of this, it is probably better to write the unit tests before the actual plugin code. This will help focus on what is needed and what the plugin needs to expose in terms of capability. To be honest, at times I have found it easier to retrofit a plugin with unit tests. I probably need to be a bit more disciplined to write tests first!
+
+(While there are a number of enhancements that could be added to this, the main thing I’d probably do is rename the plugin to something more generic than just a side note toggler, but I will leave that for the reader to do, and remember to refactor the unit tests accordingly!)
+
+

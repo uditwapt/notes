@@ -1,0 +1,290 @@
+http://slideshow.rubyforge.org/jquery.html
+========================================================================
+
+- dollar variable
+  - $
+  - css based selector
+  - returns jQuery object
+    - looks like array in Firebug
+
+  - $('#id).show()
+
+- css based selectors
+  - $('#final-speech DIV.final-dialog').hide()
+
+- dom ready event
+  - window.onload ???
+  - use specific methods for IE and Safari???
+  - No... it's
+
+  $(document).ready(function(){});
+  // or
+  $(function(){}); // this is shorter!!!
+
+- iteration
+  - $([e1, e2]).each(fn(i))
+
+- dom walking
+  - parent/s, children, next, prev, nextAll, prevAll
+
+- dom manipulation
+  - after, before, append, prepend & html
+
+- element classes
+  - addClass, removeClass, toggleClass, is (class matching)
+
+- events
+  - bind, unbind
+  - shortcuts???
+    - .click, .dblclick, .mous* .ready, .focus, .blur
+
+  $("a").click(function(event){
+     alert("Thanks for visiting!");
+     event.preventDefault();
+     $(this).hide("slow");
+  });
+
+- bubbling
+  - return false, or
+  - event.stopPropagation
+    - event is passed in to the callback
+
+- ajax
+  - $.ajax(options)
+    - url is included in options
+
+  - beforeSend, success, error, complete
+
+  $.ajax({ url: '/profile',
+    data: {'action':'check_username','username': $('#username').val()},
+    type: 'post',
+    success: function (json) {
+      // do stuff with response
+    },
+    error: function(xhr) {
+        alert('Error!  Status = ' + xhr.status);
+    }
+  });
+
+- plugins
+  jQuery.fn.myPlugin = function (args) { return this; };
+
+- browser detection
+  - jQuery.browser.msie, .safari, etc.
+
+- sources
+  - API - docs.jquery.com/Core
+  - Tutorials - docs.jquery.com/Tutorials
+  - Effects - interface.eyecon.ro
+
+
+http://docs.jquery.com/How_jQuery_Works
+========================================================================
+
+- callbacks and functions
+  - function that is passed as an argument to another function
+  - executed after the parent function has completed
+
+  - functions that appear after the parent can executed before the
+    callback executes???
+
+  - pass the function name, not as a string. also without parenthese.
+
+  - callback with arguments
+    - use anonymous function
+      function(){
+        myCallBack(param1, param2)
+      }
+
+
+http://docs.jquery.com/Frequently_Asked_Questions
+========================================================================
+
+- get and set
+  var myValue = $('#myDivId').val();    // get the value of an element
+  $('#myDivId').val("hello world");     // set the value of an element
+
+- is
+  - used with selectors
+  - hasClass
+
+- existence
+  - use length
+
+  $('#id').length
+    - $ returns "array"
+
+  $('#id').show()
+    - will do nothing if DNE
+
+- toggling
+  - is(':hidden')
+  - is(':visible')
+
+  $('#myDiv:visible').animate({left: '+=200px'}, 'slow');
+    - will animate only if visible
+
+- enable/disable
+
+   $("#x").attr("disabled","disabled");
+
+  // Enable #x
+  $("#x").removeAttr("disabled");
+
+- checked/unchecked
+
+   // Check #x
+   $("#c").attr("checked", "checked");
+   // Uncheck #x
+   $("#c").removeAttr("checked");
+
+- select
+  - $("select#myselect").val();
+  - $("select#myselect").text();
+
+- replace text in nth element
+
+  - get BEFORE set
+
+  var $thirdLink = $(this).find('li a').eq(2); # starts with 0
+  var linkText = $thirdLink.text().replace('foo','bar');
+  $thirdLink.text(linkText); # set text to linkText
+
+- ajax
+  - remember that ajax is asynchronous!!!
+  - use callbacks for returning results
+
+ function getUrlStatus(url, callback) {
+     $.ajax({
+         url: url,
+         complete: function(xhr) {
+             callback(xhr.status);
+         }
+     });
+ }
+
+ getUrlStatus('getStatus.php', function(status) {
+     alert(status);
+ });
+
+- events stop working after ajax request
+  -  $('a').click(fn) adds handlers to EXISTING elements
+  - try rebinding
+  - or try the live query plugin
+  - or live method in jQuery 1.3
+
+- event delegation
+  - bind to a common container
+  - less handlers!
+
+  - listen plugin
+    - can handle large amounts of slectors
+    - only supports 4 kinds of selects
+
+- animations turn style to block
+  - only block elements can have custom width/height
+  - workarounds for inline elements
+    - instead of show/hide, use fadeIn, fadeOut
+      - affects only opacity
+    - float the block element
+
+http://www.unemployeddeveloper.com/227_object-oriented-javascript-–-part-iii-jquery/
+========================================================================
+
+- constructor function
+  - by convention, starts with a capital letter
+
+  function Person(){
+    this.name = 'Shawn';
+    this.getName = function(){
+    };
+  }
+
+- to instantiate
+
+  var person = new Person();
+
+
+- $(function(){ }); <==> $(document).ready(function(){  });
+
+http://www.arpitonline.com/blog/2009/07/24/object-oriented-javascript-techniques/
+========================================================================
+
+var BusinessClassification = function(){
+  this.business_category_id = 1;
+
+  this.business_category = function(){
+    return $('#business_category_id');
+  }
+}
+
+- to add an instance method to an existing class:
+
+  User.prototype.getName() = function(){
+    return this.name;
+  }
+
+  - forgot how this works, but it does!
+
+- class methods/static
+  - a variable on the 'Class'
+
+  BusinessClassification.find_all = function(){
+  }
+
+  - static variables and methods do not have access to each other
+    unless explicitized
+
+  var classification = new BusinessClassification();
+  alert(classification.business_category_id)
+
+- static classes (namespaces)
+
+  var utils = {
+  };
+
+- in jquery
+
+  MyClass = function(){
+    this.title = "MyClass";
+  };
+
+  $j.extend(MyClass.prototype, {
+    toString: function(){
+      return this.title;
+    }
+  });
+
+  # same as
+  MyClass.prototype.toString = function(){
+    return this.title;
+  }
+
+- events work with objects in jquery
+
+var obj = {name:"SimpleObj"};
+jQuery(obj).bind("objectChanged", listener);
+jQuery(obj).bind("objectChanged", listener);
+jQuery(obj).trigger({type:"objectChanged"});
+
+var CustomEvents = {
+  OBJECT_CHANGED:"objectChanged";
+}
+jQuery(obj).bind(CustomEvents.OBJECT_CHANGED, listener);
+
+
+http://docs.jquery.com/Plugins/Authoring
+========================================================================
+
+jQuery.fn.plugin = function() {
+  // this  with refer to the object where plugin is attached
+}
+
+jQuery.plugin = function(){
+}
+
+- name your file jquery.*
+- add ; after the function
+- must return jquery object
+- use this.each to iterate over the current set of matched elements
+- add to jQuery instead of $

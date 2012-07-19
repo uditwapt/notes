@@ -1,0 +1,59 @@
+http://www.kuwata-lab.com/erubis/users-guide.02.html#tut-basic
+
+2-1 Basic example
+------------------
+
+    require 'erubis'
+    Erubis::Eruby.new(input)
+
+    list => []
+
+    eruby.result(:list => list) # this is what I'm most familiar with.
+
+2-2 Trimming spaces
+-------------------
+
+no spaces around <% %>
+spaces around <%= %>
+
+2-3 Escape
+----------
+
+<%= %> - not escaped
+<%== %> - escaped
+
+2-4 Embedded pattern
+--------------------
+
+:pattern => '<!--% %-->'
+
+2-5 Context object
+------------------
+
+context => {
+  :val =>
+  :list =>
+}
+
+eruby.evaluate(context)
+
+@val and @list in eruby
+
+result(binding) - invokes eval @src, binding
+  - data s passed via local variables
+
+evaluate(context) - context.instance_eval(@src)
+  - data is passed via instance variables
+
+use evaluate instead of result because result has problems
+
+2-6 context data file
+---------------------
+
+  yaml
+
+
+
+
+
+

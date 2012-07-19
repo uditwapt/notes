@@ -1,0 +1,63 @@
+#-----------------------------------------------------------------------
+# Adding blog entries
+
+* Blog class
+
+#-----------------------------------------------------------------------
+# Making new entries
+
+* #public_method - returns a Method object
+* There's also a #method method.
+* post_source is a callable method that returns some post
+* OpenStruct to create stubbed models
+
+#-----------------------------------------------------------------------
+# Posts versus entries
+
+* blog.new_post is better than Post.new
+* MiniTest::PMock.new.expect then .verify
+
+#-----------------------------------------------------------------------
+# Why publish?
+
+* capture the language of the domain
+
+#-----------------------------------------------------------------------
+# Making the blog object into a singletone
+
+* Nothing fancy, he just set THE_BLOG to Blog.new
+
+#-----------------------------------------------------------------------
+# Object trees and lone wolves
+
+* object oriented programs tend to evolve into a roughly tree shaped structure.
+* most complex systems don't have a single natural hierarchy to tem.
+
+* advantages of having parent-child relationships:
+  * controll access based on authorization information
+  * pre-load child objects with a reference back to their parent
+  * save a reference to the child object in the parent.
+  * decide the actual class of the child object to be instantiated based
+    on the parameters or the state of the parent.
+
+#-----------------------------------------------------------------------
+Stubbing out modules
+
+* stub_module
+
+#-----------------------------------------------------------------------
+# OMG Dependency Injection
+
+* setter injection - post_source
+* parameter injection
+
+* when a new requirement requires changes to more than one class, at least
+  one of them probably has too many responsibilities.
+
+#-----------------------------------------------------------------------
+# Injecting only the dependencies we need
+
+* If Blog calls Post.now, it implies Blog has Post as collaborator,
+  and may potentially call any method in Post.
+
+* The design binds Blog to a class with the same interface as Post.

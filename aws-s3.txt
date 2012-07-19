@@ -1,0 +1,133 @@
+# aws-s3
+# ======================================================================
+
+# readme
+# ----------------------------------------------------------------------
+
+# * getting started
+
+    require 'aws/s3'
+
+    # interactive shell
+    s3sh
+
+
+
+    AWS::S3::Base.establish_connection!(
+      :access_key_id     => 'AKIAJLPD55UGGBP47DNA',
+      :secret_access_key => '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'
+    )
+
+    AWS::S3::Base.establish_connection! YAML.load_file("#{Rails.root}/config/amazon_s3.yml")[Rails.env]
+
+# AWS::S3 Basics
+# ----------------------------------------------------------------------
+
+# * the service
+
+    Service.buckets
+
+# * buckets
+
+    Bucket.create('jukebox')
+
+    bucket = Bucket.find('kosoko-cdn')
+    bucket.objects.size
+
+    Bucket.objects(bucket_name)
+
+    S3Object.store(key, file, bucket)
+
+    Bucket.delete(bucket_name, :force => true)
+
+# * objects
+
+  picture = S3Object.find key, bucket
+
+  # actual data
+  picture.value
+
+  # or
+
+  picture = S3Object.value key, bucket
+
+  S3.object.stream key, bucket
+
+  # data is cached, can be reloaded
+
+  song.value(:reload)
+
+  # other functionality:
+
+  exists?
+  copy
+  rename
+  delete
+
+# * more about objects and their metadata
+  object.content_type
+
+  # you need to PUT the object into S3 again to change things like
+  # content type
+
+  object.about
+
+  object.metadata
+
+# * streaming uploads
+
+  # if data being streamed is IO, data will be read in segments and
+  # written to the socket incrementally
+
+# Setting the current bucket
+# ----------------------------------------------------------------------
+
+# scoping operations to a specific bucket
+
+  class ... < AXW::S3::S3Object
+    set_current_bracket_to 'jukebox'
+  end
+
+# BitTorrent
+# ----------------------------------------------------------------------
+
+
+# Access control
+# ----------------------------------------------------------------------
+
+# * using canned access control policies
+
+# buckets are private by default
+# objects in that bucket inherit the permission of the bucket
+# :private, :public_read, :public_read_write, authenticated_read
+
+    S3Object.store(key, data, bucket, :access => :public_read)
+
+# objects
+
+# Building custum access policies
+
+# ...
+
+# Errors
+# ----------------------------------------------------------------------
+
+# * when things go wrong
+
+begin
+
+rescue ResponseError => error
+  error
+  error.message
+  error.response.code
+end
+
+# * accessing the last request's response
+
+Servic
+# http://keakaj.com/wisdom/2007/07/27/cache-control-header-for-amazon-s3/
+# ======================================================================
+
+S3Object.store key, data, bucket, 'Cache-Control' => "max-age=#{1.year.to_i}"
+
+s3object.cache_control

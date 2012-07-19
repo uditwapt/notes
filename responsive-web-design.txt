@@ -1,0 +1,162 @@
+http://code.adonline.id.au/getting-started-with-responsive-web-design/
+========================================================================
+
+1. Change your thinking
+
+  * forget absolutes
+  * relative dimensions
+  * users will be navigating with their fingers instead of mouses
+
+2. Bookmark some useful tools
+
+  * http://ipad-emulator.org/
+  * http://netrenderer.com/
+
+3. Fix the viewport
+
+  * Tell mobile browsers not to resize your website.
+
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+4. Install ImgSizer.js
+
+  * http://unstoppablerobotninja.com/entry/fluid-images/
+
+5. Install css3-mediaqueries.js
+
+  * http://www.w3.org/TR/css3-mediaqueries/
+  * http://code.google.com/p/css3-mediaqueries-js/
+
+6. Commence with some CSS housekeeping
+
+  * Condition out body tag so that there are no margins and the height
+    will always remain 100% of the screen.
+  * Ensures the greatest amount of screen is available for use.
+
+    html, body { height: 100% }
+    body { margin: 0px }
+
+  * Images should have 100% width. Every image will load to the width of
+    its containing div.
+
+  * max-width is not supported in older versions. Conditional comment
+    needed for old IE, denoted by asterisk:
+
+    img {
+      max-width: 100%
+      border-style: none
+    }
+    *img {
+      width: 100%
+      border-style: none
+    }
+
+  * Always display a vertical scroll bar, to prevent jumping.
+
+    html { overflow-y: scroll }
+
+7. Design your container div
+
+    #container {
+      padding: 0px;
+      margin: 0px auto 0px auto;
+      width: 90%;
+      min-height: 100%;
+      max-width: 980px;
+      min-width: 120px;
+      position: relative;
+    }
+
+8. Design your structural div elements
+
+  parent  {
+    position: absolute
+    width: 100%
+    display: block
+    overflow: auto
+
+  element {
+    position: relative
+    display: inline-block
+  }
+
+9. Make your design more fluid with @media queries
+
+  * iPhone has screen width of 320px
+
+  @media screen and (min-width: 450px) {
+
+  }
+
+  @media screen and (max-width: 450px) {
+
+  }
+
+  @media screen and (max-width: 500px) {
+  .hidden-in-smaller {
+      display: none;
+    }
+  }
+
+  * You can hide images, but browsers might still download them in the
+    background.
+
+10. Step back and analyse
+
+  * horizontal drop-down menus
+  * bandwidth
+
+
+http://www.solidstategroup.com/what-we-think/converting-fixed-width-layout-to-a-responsive-design
+========================================================================
+
+Adding meta tags
+----------------
+
+* width=device-width
+
+* initial-scale=1
+  - page is fully zoomed in on first display
+
+
+* maximum-scale-1
+  - prevents the device from zooming in further than the 1:1 pixel ratio
+    when rotating to landscape orientation
+  - does not allow users to zoom in
+
+Breakpoints
+-----------
+
+* <=  320px - smartphones at portrait
+* <=  480px - smartphones at landscape
+* <=  980px - tablets
+* <= 1200px - monitors
+* >= 1200px - larger desktop monitors
+
+Media queries
+-------------
+
+* Can use fixed width for larger widths, fluid width layouts for samller
+  ones.
+* Less painful
+
+Process
+-------
+
+* Keeping the existing fixed width layout at larger widths and adapting
+  these widths to automatically resize at smaller widths is a quicker
+  technique.
+
+* Watch out for elements positioned absolutely.
+* horizontal menus should wrap gracefully. Use white-space: nowrap
+* Set max-width of images and form elements to 100%
+* Watch out for elements with fixed width. Need to change to width: auto
+  for smaller screens.
+* Hide content not needed for smaller screens?
+* Separate media queries into different css files for better structure.
+* Order of css files is importants.
+
+
+
+
+

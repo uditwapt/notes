@@ -1,0 +1,131 @@
+Model
+------------------------------------------------------------------------
+
+class BusinessAd
+  has_many :business_classifications
+  accepts_nested_attributes_for :business_classifications, :allow_destroy => true
+
+business_ad.business_classifications_attributes = [
+  { :business_category_id => 1,
+    :primary => true},
+  { :id => 2, :business_category_id => 2,
+    :primary => false},
+  { :id => 1, '_delete' => 1}
+
+]
+
+View - empty business categories
+------------------------------------------------------------------------
+
+accepts_nested_attributes_for :business_classifications,
+    :reject_if => proc { |attrs| attrs['primary'] == '0' && attrs['business_category_id'].blank? }
+
+module ApplicationHelper
+  # usage: setup_model_for_nested_form(@business_ad, :business_classifications, :max_children_count => 10)
+  def setup_model_for_nested_form(parent, association, options = {})
+    max_children_count = options[:max_children_count]
+
+    if max_children_count
+      while parent.send(association).size < max_children_count
+        parent.send(association).build
+      end
+    else
+      # do nothing
+    end
+
+    return parent
+  end
+end
+
+form_for setup_model_for_nested_form(@business_ad, :business_classifications, :max_children_count => 10)
+
+Helper
+------------------------------------------------------------------------
+
+- select
+
+Form
+------------------------------------------------------------------------
+
+- primary - radio
+- business_category - select
+
+form for @business_ad do |ad_form|
+  ad_form.fields_for :business_classifications do |classification_form|
+    classification_form.text_field :business_category_id
+
+    unless classification_form.object.new_record?
+      classification_form.check_box '_delete'
+      classification_form.label '_delete', 'Remove'
+    end
+  end
+
+  submit_tag
+end
+
+- manual testing via firefox
+
+Controller
+------------------------------------------------------------------------
+
+- business_ads/index
+  - set object to oldest unupdated ad from business ads
+
+- business_ads/update
+  def update
+    @person = Person.find(params[:id])
+    @person.update_attributes(params[:person]) ?
+      redirect_to(person_path(@person)) : render(:action => :edit)
+  end
+
+- suggest naming index as assign
+  - later on, index can be used for list of business ads
+
+Model - Sort classifications
+------------------------------------------------------------------------
+
+- business ad model
+  - sort business classications by "#{business_category.parent.name}/#{business_category.name}"
+
+  .sorted named scope
+
+Model - validate classifications
+------------------------------------------------------------------------
+
+- business ad model
+  - invalid classification
+    - missing business_category id
+      - how to highlight?
+
+Model - validate primary
+------------------------------------------------------------------------
+
+- business ad model
+  - validation: require one and only one primary business classification
+
+JavaScript
+------------------------------------------------------------------------
+
+- study jQuery
+
+- see
+  - http://github.com/alloy/complex-form-examples/tree/nested_attributes
+  - http://github.com/alloy/complex-form-examples/blob/a234fde4419836f277d7e340657f1d8418911d68/app/views/projects/_form.html.erb#L40
+
+- javascript
+  - add new classification
+  - clicking remove should hide the classification
+  - clicking on business category edit link should show business category selection
+    - only one business category selection
+  - clicking hide should hide business category selection
+  - selecting a business category should update the business classification
+    - highlight the business classification
+    - hide selection
+  - classifications that have been marked '_deleted' should be hidden
+
+------------------------------------------------------------------------
+sources
+
+- http://ryandaigle.com/articles/2009/2/1/what-s-new-in-edge-rails-nested-attributes
+- http://weblog.rubyonrails.org/2009/1/26/nested-model-forms
+- http://blog.smartlogicsolutions.com/2009/02/24/rails-23-nested-object-forms-im-not-crazy-about-them/

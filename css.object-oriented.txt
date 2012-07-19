@@ -1,0 +1,32 @@
+object oriented css
+
+- web dev philosophy
+	- respect design
+	- respect original vision
+
+- problems with css	
+	- require expert ability just to get started
+	- css file size just keeps getting bigger
+	- code re-use is almost non-existent
+	- code is too fragile
+
+- two main principles
+	- separate structure and skin
+	- separate container and content
+	
+- component library
+
+- separate container and content
+	- break dependency between container module
+		and content objects it contains
+		
+- contour blocks
+        x
+	background blocks
+	      x
+	content objects
+	
+- build html from component library
+- site wide legos
+
+

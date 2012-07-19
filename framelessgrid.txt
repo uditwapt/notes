@@ -1,0 +1,7 @@
+Frameless: http://framelessgrid.com/
+========================================================================
+
+1. Make a regular fixed-width grid.
+2. Make it repear infinitely.
+3. Center it in the viewport.
+4. Start using the grid

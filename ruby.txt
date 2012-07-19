@@ -1,0 +1,719 @@
+
+==============================
+BEYOND JAVA
+==============================
+
+------------------------------
+Chapter 6. Ruby in the Rough
+------------------------------
+
+------------------------------
+6.1. About Ruby
+
+6.1.1. Ruby Is Fully OO
+irb - ruby shell
+numbers are objects
+nil - nothing, null
+object.class
+nil is an object (i think)
+
+6.1.2. Typing
+Fixnum
+dynamically typed - can change type anytime
+the type is bound to the object (not the other way around)
+ruby is strongly typed (can't break typing rules)
+object.size (object can be string or numeric) 
+object.methods
+
+6.1.3. Conditionals
+nil and evaluate to false (but nil==false is false! which means they are not the same)
+everything else (including 0) = true
+"false" is a string, not false (why of course!)
+puts <string>
+<do something> unless <condition>
+object.<somemethod?> - usually test method
+ex. object.nil? - is object nil?
+object.<somemethod!> - dangerous method, has side effect
+ex. replace!(in_string, sub_string, replacement) - modifies the input string.
+<do something> if <condition>
+if <condition> then <do something> end
+if <condition> 
+  <do something> 
+end
+def <method> (<parameters)
+  <code...>
+end
+ruby returns the value of the last statement
+
+6.1.4. Looping
+puts line while line=gets
+- assigment statement (line=gets) returns value assigned
+- ctrl-Z (^Z, EOF character) returns nil
+while <condition> 
+  <do somthing>
+end
+<do something> until <condition>
+
+6.1.5. Ranges
+x..y represents values from x to y, inclusive
+Range class
+range === <item> 
+  - does range contain the item?
+for <item> in <item1>..<itemn>
+  <do something>
+end
+
+6.1.6. Regular Expressions
+/<regular expression>/
+Regexp class
+<string> =~ regex - returns location in string if string matches regex. nil if not found
+
+6.1.7. Containers
+Array: [1,2,3]
+Hash: {0=>"zero", 1=>"one", 2=>"two", 3=>"three"}
+Ruby containers need not be homogeneous
+
+6.1.8. Files
+File.open(<path>) do |file|
+  <do something on file>
+end
+ARGV[0] 1th command line argument
+
+6.1.9. Why Should You Care?
+Each code generation technique that you use limits your flexibility
+Remember, configuration is still code. 
+overuse of XML in Java is a fad
+
+inside-out refactoring 
+- usually, write reusable code to plug inside app 
+outside-in refactoring
+- inversion of control 
+- write generic code and customize inside of code.
+
+------------------------------
+6.2. Applying Some Structure 
+
+yield statement
+In Ruby, everything returns some value
+In Ruby, method parameters and instance variables are not typed
+
+6.2.1. Classes
+rb extension
+
+class <name>
+  def initialize
+    @total = 0 
+  end
+end
+
+ @<variable> - instance variable
+@@<variable> - class variable
+ $<variable> - global variable
+
+require '<class>'
+<object> = <class>.new
+
+open classes - can add/edit methods to a class during run time
+
+subclassing
+class < child class> < <parent class>
+super keyword
+class.superclass
+Object.superclass => nil
+
+6.2.2. Using Mixins
+
+module
+- groups methods an classes
+- is not a class, can't instantiate
+- has own namespace
+
+mixin
+- interface with implementation
+- class <class> 
+    include <mixin>
+  end
+- can access methods of class which included it
+
+attr_reader:name - read access to name
+
+aspect is like capability
+
+self, super keyword
+
+inspect - toString
+
+module Reversible
+  def inspect
+    super.reverse
+  end
+end
+// why super and not self?
+// cause whatever class that is including Reversible might now implement reverse?
+
+AOP is like mixin
+
+6.2.3. Interceptors
+
+method interception 
+- technique that attaches arbitrary services to a POJO
+- In ruby you rename and replace a method, with the new implementation calling the old
+
+alias_method :method_copy, : original_method
+- copies original_method to method_copy
+
+6.2.4. AOP
+AOP lets you add services to your POJO without modifying any code.
+With EJB, you put an object in a container. You can configure the services that the container will provide to the object.
+
+6.2.5. Dependency Injection
+SomeObject
+Consumer 
+- uses SomeObject
+- does not instantiate it  
+Container
+- instantiate SomeObject and attaches it to Consumer
+Advantages
+- you can change implementations of SomeObject without impacting Consumer
+Disadvantages
+- more complex, need to take care of Container.
+
+------------------------------
+Chapter 7. Ruby on Rails
+------------------------------
+
+------------------------------
+7.1. The Numbers Game 
+
+persistent domain model needs
+  - database table with fields and indices
+  - class with fields
+  - accessors for those fields
+  - mapping between database table and the class
+  - mapping between database table fields and the class fields
+  
+ORM (Object Relational Model?) - better when domain model and object model are sufficiently different
+
+with rails
+  - page and action caching strategies are right at the surface -> performance gains with Rails are easy to achieve
+  - lack of configure/compile/deploy/test cycle -> faster testing
+  - can modify framework by changing framework classes during runtime
+  
+------------------------------
+7.2. Rails by Example 
+
+gem install rails -p http://wwwgate.ti.com:80 --include-dependencies
+see http://elia.wordpress.com/2007/07/18/gems-through-the-proxy-or-the-undefined-method-error/
+
+7.2.1. Generating a Basic Application
+
+rails <project> 
+  - creates project directory
+<project>\ruby script/server
+  - starts the development web server (http://localhost:3000)
+  - to change properties of server, edit script/server
+
+table name
+- plural
+- watch out for capitalization
+
+database configuration   
+  - config/database.yml
+    development:
+      adapter: mysql
+      database: trails
+      host: localhost
+      username: root
+      password: password
+  - stop and restart server to update
+   
+generate model
+  - ruby script/generate model <model>
+  - rails will dynamically load the contents of the table <model>
+  
+ruby script/console - lets you test your model in an irb session
+
+generate controller
+  ruby script/generate controller trails
+  ruby script/generate model trails
+
+class TrailsController < ApplicationController
+  scaffold :trails
+end
+  - scaffold is a method, the parameter is :trails which is a class
+  
+7.2.2. Managing Relationships and Updating Views
+
+ruby script/generate scaffold locations
+ruby script/generate model location
+
+you specify the relationship between Trails and Locations
+
+class Trails < ActiveRecord::Base 
+  belongs_to :location
+end
+
+class Locations < ActiveRecord::Base
+  has_many :trails
+end
+
+ActiveRecode class is in the Base module
+belongs_to and has_many are methods. location and trails are their parameters
+
+then you update the TrailsController to include the locations of a trail when you edit a trail
+
+class TrailsController < ApplicationController
+...
+  def edit
+    @trail = Trail.find(@params[:id])
+    @locations = Location.find_all
+  end
+...
+end
+
+then you edit the edit trail view to include options for the locations:
+
+<%= collection_select("trail", "location_id", @locations, "id","city") %>
+
+------------------------------
+7.3. Under the Hood 
+
+Active Record - relational database access
+Action Pack - model/view/controller
+Rails - integration
+
+7.3.1. Active Record
+Active Record 
+- wrapper around a database table
+- can do inheritance (wow! how? why?)
+- can manage relationships (this i see why)
+
+7.3.1.1. Automatic properties
+properties with accessors
+simple CRUD database methods
+
+7.3.1.2. Association management
+
+7.3.1.3. Composition
+compose objects from multiple tables
+
+composed_of method
+
+7.3.1.4. Inheritance
+
+class Product < ActiveRecord::Base
+end
+
+class Bike < Product
+end
+
+7.3.1.5. Other features
+- recursive relationships
+- validating certain (certain talaga!) types of rules
+- email notification! (hmmm)
+- transactions
+- error logging
+- test fixtures
+
+7.3.2. Action Pack
+
+request -> dispatcher -> controller -> view system -> template -> html
+view system is "template driven"
+kinda like struts
+
+controller has group of actions instead of group of classes
+ 
+7.3.2.1. Capabilities
+ 
+code that is concerned with the view (and only the view) does belong on the page
+
+can attach filters like servlets
+automatic pagination of result sets 
+automatic navigation links
+helper classes (ex. dates)
+Ajax integration
+building and validating forms
+logging, caching at three levels (page, action, and fragment)
+benchmarking support
+unit testing and debugging
+
+===========================
+Learn Ruby on Rails in 4 Days
+===========================
+
+---------------------------
+Day 1 on Rails
+---------------------------
+
+1. rails <project> - creates skeleton of project
+  app - model, view, controller, helper
+  config - database.yml
+  log - development.log needs regular purging!
+  public - for apache
+
+2. ruby server (in project/script folder) 
+  - will run project in default server
+
+apache configuration...
+- fastCGI
+
+downloading specific version of rails...
+
+3. gem install mysql
+- install mysql adapter
+
+gem install mysql -p http://wwwgate.ti.com:80 --include-dependencies
+4. create production and development databases. 
+  - I think there's no need to create test database since this will be generated using rake.
+  
+5. setting up database
+  - database.yml
+  - make sure there's a space between the key and the value, or you'll get an error like one below:
+    c:/ruby/lib/ruby/1.8/yaml.rb:133:in `load': syntax error on line 18, col 2: `  host:localhost' (ArgumentError)
+  
+6. create table
+  - plural name
+  - underscores -> spaces
+  - beware mixed case. use lower case for now.
+  - always have primary key id
+  - links to other tables must have _id (like foreign_id?)
+  - add created_on and updated_on fields (ActiveRecord::Timestamp)
+  - if multi-user system, also include lock_version (integer default 0) to do "optimistic locking" (not sure what this is or even if it's necessary). lock_version must be included as hidden field in forms (ActiveRecord::Locking)
+  
+6. ruby script/generate model <table> 
+  - generates model
+  - I think this should automatically install the adapter, assuming no proxy problems.
+  - creates 
+    - <table>.rb
+    - <table>_controller_test.rb
+    - <tables>.yml
+    
+7. ruby script/generate controller <table>
+  - creates controller. heart of the application. very important!
+  - creates
+    - app\controllers\category_controller.rb
+    - app\helpers\category_helper.rb (anong gamit nito?)
+    - app\views\categories folder
+    - app\views\layouts folder
+    
+8. scaffold
+  class CategoryController < ApplicationController
+    scaffold :category
+  end
+  
+  ActionController::Scaffolding
+    
+  Note: class - CamelCase. file name  - lower_case_with_underscore
+  
+  http://localhost:3000/<app>/<model>
+  
+  if you add the same instance, you'll get an error.
+  
+  validation is added in the model!
+  
+9. Enhancing the model
+  
+  Model contains all data-related rules
+    - data validation
+    - relational integrity
+
+  category.rb:
+    validate_length_of :category, :within => 1..20
+    validate_uniqueness_of :category, message => "already exists."
+      // resulting message is "Category already exists."
+    
+  ActiveRecord::Validations::ClassMethods
+  
+---------------------------
+Day 2 on Rails
+---------------------------
+
+ruby script/generate scaffold category
+- runs scaffold as a script. This will generate
+  - controllers
+  - views
+  - layouts
+  - stylesheets!
+  
+note that this generates files with plural file name. categories instead of category. So delete category_controller.rb to avoid confusion!
+
+database <-> model <-> controller <-> view <-> user
+
+-----------------------------
+The Controller
+
+controller handles programming logic of application
+
+controller
+  - methods for
+    - index - front page
+    - list - shows list of objects
+    - show - shows a object based on ID
+    - new - shows an new (empty) object
+    - create - adds new object to database. If good, redirects to list, else renders new (with error message?)
+    - edit - shows a object (based on ID) in an edit page
+    - update - updates object in database. If good, redirects to show, else renders edit (with error message?)
+    - destroy - deletes object in database and redirects to list 
+  - there are instance fields for
+    - @category - present category
+    - @category_pages ???
+    - @categories - list of categories
+      @params - parameters
+          
+why does index call list before rendering list?
+when to choose redirect_to over render_action? render_action writes html, for sure. redirect skips to another page.
+
+what is :parameter? name of parameter in a method. say method(param1, param2). you can call method like this
+  method :param1=>value
+If param1 is boolean
+  method :param1 
+    - means param1=>true
+
+render_action '<action>' does action
+  
+if user selects <action>
+  - controller will run <action> method
+  - render template <action>.rhtml
+
+render_action renders the page for an action
+
+redirect_to allows controller to skip the rendering part by going directly to another action
+
+why not just render immediately?
+
+ActionController::Base
+
+ActionRecord handles database operations
+- find, find_all, new, save, update_attributes, destroy. 
+- some of these are class methods, some are instance methods
+- why update_attributes? why not just update?
+- log: development.log for sql statements
+- ActionRecord::Base
+
+controller defines the flow of the pages
+
+one controller for each model?
+
+-----------------------------
+The View
+
+Three Components
+  Layout 
+  - used by all actions
+  - typically start and end of html, 
+  - application.rhtml (default default), or <controller>.rhtml (just default)
+  - stylesheet_link_tag - helper routine. See ActionView::Helpers::AssetTagHelper
+  
+  Template 
+  - code specific to an action, <action>.rhtml
+  - in new.rhtml, render_partial 'form' calls _form.rhtml
+  
+  Partial 
+  - common code, _<partial>.rhtml
+  - in _form.rhtml
+    - error_messages_for - returns error messages from last form submit
+
+pagination
+  - @categories - array of categories
+  - @category_pages - Paginator instance
+  - in list.rhtml
+    - <table>.content_columns
+      - content_columns excludes special columns like "id", those ending with "_id" or "_count"
+      - column.human_name is a synonym or human_attribute_name
+      - h method "escapes" html code
+      - @category_pages.current - returns a Page object (nil if none)
+
+-----------------------------
+Tailoring the Generated Scaffolded Code
+
+- you can assign a variable in the template and use it at the layout? Probably are created first before layout? Does this mean you can't use a variable in the layout and use it in the template?
+
+- how can you determine if an object is a Date? use kind_of
+- how do I apply a date format to entire application?
+- pagination_links - basic HTML link bar
+- note size and maxlength in text_field method
+  text_field "table", "column", "size"=>20, "maxlength"=>20  
+  
+--------------------------
+Notes on Day 3 on Rails
+
+Source: <a href="http://www.rails4days.pwp.blueyonder.co.uk/Rails4Days.pdf">Four Days on Rails</a>
+
+<h4The 'Items' Table / The Model </h4 
+
+<em>Validating Links between Tables
+
+<code>belongs_to :category</code> 
+- indicates that Item belongs to a Category. 
+
+TODO: Determine what validates_associated exactly does
+
+<em>Validating User Input</em>
+
+<code>validates_presence_of, validates_format_of, validates_inclusion_of, validates_length_of</code> - different methods for validating the contents of fields
+
+&lt;field&gt;_before_type_cast
+used when validating user input. 
+indicates that you want to check the String raw input of a numeric field before it is converted to a number
+
+<h4The 'Notes' Table / The Model </h4
+
+<em>Using a Model to maintain Referential Integrity</em>
+<pre>
+def before_destroy
+  ...
+  Note.find(note_id).destroy
+  ...
+end
+</pre>
+- before_destroy is an event that is triggered just before the object (in this case, Item) is, well, destroyed. 
+
+<code>Item.find_by_note_id(id).update_attribute('node_id', NIL)</code>
+- you can update the Item by attribute
+
+<h4More on Views / Creating a Layout for the Application</h4
+
+<code>function setFocus()</code> 
+- nifty javascript function to set the focus of the browser to the first text/text area in the form
+
+Seems like @variables are shared from template to layout. Does this mean that the template are generated first before the layout?
+
+<h4More on Views / The 'To Do List' Screen</h4
+
+<em>Purging completed 'To Dos'...</em>
+
+link_to_image
+- by default expects a png image in pub/images directory
+- clicking image will run specified action
+
+<code>Item.destroy_all "done = 1"</code>
+- deletes all items whose done = 1
+
+<em>Changing the Sort Order...</em>
+
+After a controller method is done, it will try to render a template of the same name as the method. 
+
+<em>Adding a Helper</em>
+
+<code>self</code> is Ruby's equivalent of the Java <code>this</code> keyword.
+
+<pre>
+module ApplicationHelper
+  def self.append_features(controller)
+    ...
+  end
+Was this generated by the scaffold script?  
+
+<code>tag ("img", img_options)</code> - creates a tag with the given options. The options is a Hash.
+
+<code>"/images/#{src}"</code> - neat way of writing Strings with variables inside. In this case <code>src</code> is the variable.
+
+<code>(condition)? (expression if true): (expression if false)</code>
+
+<pre>
+class ApplicationController < ActionController::Base
+  helper :Application
+end
+</pre>
+- What's up with this code linking of ApplicationHelper to the ApplicationController?
+
+<em>Using Javascript Navigation Buttons</em>
+
+<code>url_for (:controller => 'categories', :action => 'list')</code>
+- used to get the URL to run the list action in categories
+
+<em>Formatting a Table with a Partial</em>
+
+<code>render_partial "list_stripes", item</code>
+- renders one item
+- list_stripes is an rhtml page
+- Rails will pass a sequential number list_stripes_counter
+
+<code>render_collection_of_partials "list_stripes", @items</code>
+- renders a collection of items
+
+<code>list_stripes["column name"]</code>
+- gets the column name of the item
+
+<em>Handling Missing Values in a Lookup</em>
+
+<code>list_stripes.category?</code> 
+- is category not NIL?
+
+<h4More on Views / The 'New To Do' Screen</h4
+
+See ActionView::Helpers
+
+<pre>
+&lt%= submit_tag "Save" %&gt;
+&lt%= submit_tag "Cancel", {:type =&gt; 'button', :onClick=&gt;...} %&gt;
+</pre>
+If there are more than one button in the form, the "Submit" button (in this case Save) will route to the default form action. Everyone else (Cancel) will have onClick javascripts that will move to the other actions.
+
+<h4Trapping Exceptions in Ruby</h4
+<code>begin... rescue... end</code>
+- try/catch
+
+<pre>
+def create
+  begin
+    ...
+    if @item.save
+      ...
+    else
+      ...
+      render_action 'new'
+    end
+  rescue
+    ...
+  end
+end
+</pre>    
+Notice that instead of using redirect_to, the Author used render_action.
+
+<em>Creating a Drop-down List from a Lookup Table</em>
+
+<code>options_from_collection_for_select</code>
+- longest method name I've seen in a while
+
+<em>Creating a Drop-down List from a List of Constants</em>
+
+<pre>
+<% @item.priority = 3 %>
+<td><%= select "item", "priority", [12345] %></td>
+- sets the default priority to 3
+
+------------------
+
+Notes on Day 4 on Rails
+
+<h4> The 'Notes' screens / Linking 'Notes' to the 'Edit To Do'</h4>
+
+<pre>
+<% if @item.note_id.nil? %>
+  <!-- add button -->
+<% else %>
+  <!-- edit button --> 
+  <!-- delete button -->
+<% end %>
+</pre>
+- code for changing the Note buttons, depending on whether or not a note for the to do item exists.
+
+<h4>The 'Notes' screens / The 'New Note' Screen</h4>
+
+<h5>Saving and retrieving Data using Session Variables</h5>
+
+<pre>
+@session[:item_id] - @params[:id]</pre>
+<br />- So does this mean all other variables (even @variables) only exist until the page finish rendering?
+<br />-When to use session versus your usual request parameters?
+
+<h4>Navigation through the system / Setting the Home Page for the Application</h4>
+
+<ul>
+<li>add the home page definition to the Routes files:
+<pre>
+map.connect '', :controller => 'items'
+</pre>
+<li>rename public\index.html to public\index.html.orig (in order words, delete index.html)
+</ul>

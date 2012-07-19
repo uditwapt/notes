@@ -1,0 +1,123 @@
+http://www.modrails.com/documentation/Users%20guide.html
+========================================================================
+
+
+rails spawn method
+------------------------------------------------------------------------
+- smart
+  - cache ror framework
+  - cache application code
+  - pros
+    - reduce spawn time by as much as 90%
+    - reduce memory usage by 33%
+  - cons
+    - compatibility issues
+
+- smart-lv2
+  - default
+  - no framework spawner
+  - uses the application spawner directly ???
+  - framework is still cached within instances of the same application
+  - pros
+    - more compatible with a larger number of applications compared to
+      smart
+  - cons
+    - slower than smart spawning if you have many applications
+    - shared hots should use smart method instead
+
+- conservative
+  - no code caching at all
+  - pros
+    - compatible with all rails apps
+    - cons
+      - much slower than smart spawning
+      - does not reduce memory
+
+
+spawning methods explained
+------------------------------------------------------------------------
+
+11.2 smart spawning method
+
+copy-on-write semantics
+
+11.2.1 how it works
+  - smart-lv2
+    - applicaton spawner server process loads environment.rb
+    - when passenger needs a new worker, it will instruct the application
+      spawner server to do so
+    - about 10 times faster
+    - requires ruby ee, since it's copy on write friendly
+
+  - smart
+    - framework spawner loads rails framework, not the application
+
+  - vendored rails frameworks cannot be shared by different apps
+  - application spawner and framework spawner have idle timeouts
+
+11.3 smart spawning gotcha #1: unintenional file descriptor sharing
+  - file descriptor - opened file, opened socket connection
+  - if different worker processes write to such a file at the same time,
+    their write calls might interleave which may potentially cause
+    problems
+  - involves socket connections
+  - solution is to close and reestablish the connection when passenger
+    is creating a new worker process
+  - ee reestablishes the connection to the database upon creating a
+    new worker process
+
+11.3.1. Example 1: Memcached connection sharing (harmful)
+
+if defined?(PhusionPassenger)
+    PhusionPassenger.on_event(:starting_worker_process) do |forked|
+        if forked
+            # We're in smart spawning mode.
+            reestablish_connection_to_memcached
+        else
+            # We're in conservative spawning mode. We don't need to do anything.
+        end
+    end
+end
+
+11.3.2. Example 2: Log file sharing (not harmful)
+
+11.4. Smart spawning gotcha #2: the need to revive threads
+
+11.5. Smart spawning gotcha #3: code load order
+
+
+http://plasti.cx/2010/02/03/getting-passenger-to-play-nice-with-interlock-cache_fu-and-memcached
+========================================================================
+
+Rails::Initializer.run do |config|
+  # gem and plugin configs above ....
+  if defined?(PhusionPassenger)
+    PhusionPassenger.on_event(:starting_worker_process) do |forked|
+      if forked
+        # We're in smart spawning mode ...
+        if defined?(CACHE)
+          Rails.logger.info('resetting memcache client')
+          CACHE.reset
+          Object.send(:remove_const, 'CACHE')
+          Interlock::Config.run!
+        end
+      else
+        # We're in conservative spawning mode. We don't need to do anything.
+      end
+    end
+  end
+end
+
+
+
+http://www.sekuda.com/rails_initialization_and_configuration_order
+========================================================================
+
+config/preinitializer.rb
+config/environment.rb
+config/environments/#{RAILS_ENV}.rb
+plugin initialization
+gem initialization
+config/initializer/*.rb
+all after_initialize blocks, in the order they were defined in (so same order as above)
+any junk left below the Rails::Initializer.run call/block in environment.rb

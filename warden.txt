@@ -1,0 +1,282 @@
+Warden
+========================================================================
+
+- http://wiki.github.com/hassox/warden/
+
+Overview
+------------------------------------------------------------------------
+
+- the what
+  - rack based middleware
+
+- the why
+  - common authentication mechanism for rack apps
+
+- the how
+  - warden sits in the rack stack, directly after session middleware
+  - env['warden']
+
+    env['warden'].authenticated?
+    env['warden'].authenticated?(:foo) # foo scope
+    env['warden'].authenticate(:password) # try to authenticate via password strategy
+    env['warden'].authenticate!(:password) # require authentication via password strategy
+
+  - if you don't want to authenticate a request, don't ask warden to authenticate it.
+
+  - warden provides access to user object if authentication is successful.
+  - User can be anything except nil???
+
+    env['warden'].user
+
+  - strategy
+    - place where authentication logic actually runs
+
+- failing authentication
+
+    throw(:warden)
+    throw(:warden, :stuff => :foo)
+
+  - bails outs to a failure application that you must set up
+
+- callbacks
+
+- scopes
+  - multiple users logged in simultaneously???
+
+Setup
+------------------------------------------------------------------------
+
+- Rack setup
+  - must be downstream of some kind of session middleware
+  - must have a failure application declared
+  - must declare which strategies to use by default
+
+    Rack::Builder.new do
+      use Rack::Session::Cookie
+
+      use Warden::Manager do |manager|
+        manager.default_strategies :password, :basic
+        manager.failure_app = BadAuthenticationEndsUpHere
+      end
+
+      run SomeApp
+    end
+
+- session setup
+  - you need to tell Warden how to serialize the user in and out of the
+    session
+
+    Warden::Manager.serialize_into_session do |user|
+      user.id # session gets user.id ???
+    end
+
+    Warden::Manager.serialize_from_session do |id|
+      User.get(id)
+    end
+
+- declare some strategies
+
+- use it in your application
+  - remember, all above is just setup, config
+
+    env['warden'].authenticate!  # use defaults :password and :basic
+    env['warden'].authenticate! :password # Use the :password strategy only
+
+    # how will it get the password from the view???
+
+Strategies
+------------------------------------------------------------------------
+
+- cascading strategies to determine if a request is authenticated. Possible outcomes:
+  - one succeeds
+  - no strategies are found relevant
+  - a strategy fails
+
+- what is a strategy?
+  - logic for authenticating request.
+  - Warden::Strategies:Base
+
+    Warden::Strategies.add(:password) do
+      def valid?
+        params[:username] || params[:password]
+      end
+
+      def authenticate!
+        u = User.authenticate(params[:username], params[:password])
+        u.nil? ? fail!("Could not log in") : success!(u)
+      end
+    end
+
+  - valid?
+    - optional
+    - strategy will only be tried if valid?
+
+  - authenticate!
+    - available methods:
+      - request
+      - session
+      - params
+      - env (Rack env)
+    - actions:
+      - halt! - makes this strategy the last one processed
+      - pass - ignore this strategy
+      - success!(user) - logs in user
+      - fail(error) - causes a halt
+        - does fail mean not authentic or that the strategy failed???
+      - redirect!
+        - can supply with params, options
+        - redirect to another url
+        - custom! - returns a custom rack array to be handed back untouched ???
+      - miscellaneous things
+        - headers
+        - errors
+
+  - using strategies
+
+      env['warden'].authenticate(:password, :basic)
+        - tries password, and failing that, basic
+
+  - sharing strategies
+    - useful for multiple apps ran by the same company
+
+Serializers
+------------------------------------------------------------------------
+
+- store and fetch information about the logged in user
+- SessionSerializer
+  - for fetching and storing the user from the rack-managed session
+  - custom serializers not available yet
+
+- setting up and configuring serializers
+
+Failures
+------------------------------------------------------------------------
+
+- when a failure occurs while authenticating a response, a rack endpoint
+  is called. The rack endpoint is the failure app.
+
+- failing authentication
+  - throw :warden
+  - can be thrown in any downstream middleware or endpoint
+
+  - what happens
+    - lazy auth object is checked for redirects, custom rack responses.
+    - if there is a failure, or nothing has occured, the failure app is
+      called.
+    - env['PATH_INFO'] is rewritten to '/unauthenticated'
+    - options passed to throw are included in env['warden.options']
+    - before_failure callbacks are called
+    - failure app is called.
+
+Users
+------------------------------------------------------------------------
+
+- two sides to authenticating requests:
+  - requester (user)
+  - application
+
+- accessing a user
+  - call user on auth object
+
+    env['warden'].user(:sudo) # sudo is scope
+
+- setting the user
+
+    env['warden'].set_user(@user, :scope => :admin)
+
+  - is scope a role? what is the user has multiple roles???
+
+Callbacks
+------------------------------------------------------------------------
+
+- after_set_user
+  - on each request when they are accessed for the first time via env['warden']
+  - when the user is initially authenticated
+  - when the user is set via set_user method
+
+    Warden::Manager.after_set_user do |user, auth, opts|
+      unless user.active?
+        auth.logout
+        throw(:warden, :message => "User not active")
+      end
+    end
+
+- after_authentication
+  - executed every time the user is authenticated (first time in each session)
+
+    Warden::Manager.after_authentication do |user,auth,opts|
+      user.last_login = Time.now
+    end
+
+- before_failure
+  - right befor failure app is called
+  - useful for mutating the env if required by the rack endpoint.
+
+    Warden::Manager.before_failure do |env, opts|
+      request = Rack::Request.new(env)
+      env['SCRIPT_INFO'] =~ /\/(.*)/
+      request.params[:action] = $1
+    end
+
+  - before_logout
+    - useful for deleting a remember_me token
+
+    Warden::Manager.before_logout do |user,auth,opts|
+      user.forget_me!
+      auth.response.delete_cookie "remember_token"
+    end
+
+Scopes
+------------------------------------------------------------------------
+
+- multiple users to be logged in at the same time
+- use very cautiously
+- use cases
+  - sudo access
+  - publisher checking what viewing it as another user
+  - secured authentication step
+  - can also be used to authenticate users access to a particular account
+- default scope is :default
+
+- using scopes
+  - scope is identified by object, usually symbol
+
+Authenticated session data
+------------------------------------------------------------------------
+
+- warden provides a way to keep data for an authenticated session separate from normal session data
+- useful for scopes, but can also be used when using single login
+
+- setting data
+
+    env['warden'].session[:foo] = 'bar'
+    env['warden'].session(:admin)[:foo] = 'admin bar'
+
+- getting data
+
+    env['warden'].session[:foo]
+
+- logout
+  - clears session data
+
+    env['warden].logout
+
+Testing
+------------------------------------------------------------------------
+
+- use rack-test
+- Warden::Test::Helpers
+  - login_as
+  - logout
+
+- reset warden in test mode with Warden.test_reset!
+
+Rails_Warden
+========================================================================
+
+- config/initializers/warden.rb
+
+Skroutz.gr + warden
+========================================================================
+
+- http://team.skroutz.gr/posts/skroutz-warden/

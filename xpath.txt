@@ -1,0 +1,99 @@
+XPath
+========================================================================
+
+XPath Introduction
+------------------------------------------------------------------------
+
+- 100 built in functions!
+
+XPath Nodes
+------------------------------------------------------------------------
+
+- xpath terminology
+  - nodes
+    - element, attributes, text, namespace, processing-instruction, comment, document
+    - documents are trees of nodes
+    - topmost is root element
+  - atomic values
+    - no children or parent eg. strings
+  - items
+    - nodes or atomic values
+
+- relationship of nodes
+  - parent
+    - each element and *attribute* has one parent
+  - children
+    - zero or more children
+  - siblings
+  - ancestors
+  - descendants
+
+XPath Syntax
+------------------------------------------------------------------------
+
+- xml example document
+- selecting nodes
+  - child
+  - /root
+  - node/child
+  - //descendant
+  - node//descendant
+  - //@attribute - nodes with lang as attribute ???
+
+  - . - current node
+  - .. - parent node
+  - @ - attributes
+
+- predicates
+  - specific node or node with specific value
+  - always embedded in square brackets
+
+  - bookstore/book[1] - first book
+  - bookstore/book[last()] - last book
+  - bookstore/book[last() - 1] second to the last ???
+  - bookstore/book[position() < 3] - first two books
+  - //title[@lang] - all titles with attribute lang
+  - //title[@lang='eng'] - all titles with lang == eng
+  - bookstore/book[price > 35.00]
+  - bookstore/book[price > 35.00]/title
+
+- selecting unknown nodes
+  - * - any element node
+  - @* - any attribute node
+  - node() - any node
+
+  - bookstore/* - child nodes of bookstore
+  - //* - all elements
+  - //title[@*] - all titles with attributes
+
+- selecting several paths
+  - //book/title | //book/price - AND
+
+XPath Axes
+------------------------------------------------------------------------
+
+- xpath axes
+  - axis is a node set relative to the current node
+    - ancestor, ancestor-or-self, ... ???
+    - are these actual operators ???
+
+- location path
+  - can be absolute or relative
+  - absolute
+    - /step/step
+  - relative
+    - step/step
+
+  - location step:
+    - axisname::nodetest[predicate]
+    - child::book - book nodes that are children of the current node
+    - child::text() - all the text children of the current node
+
+XPath operators
+------------------------------------------------------------------------
+
+  - | - and
+  - + - * div mod
+  - = != < <= > >=
+  - or, and
+

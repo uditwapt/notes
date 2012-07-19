@@ -1,0 +1,331 @@
+http://guides.rubyonrails.org/asset_pipeline.html
+
+1. What is the asset pipeline?
+------------------------------------------------------------------------
+
+* concatenate, minify or compress JavaScrpt and CSS assets
+* can write assets in CoffeeScript, Sass, and ERB
+
+* sprockets gem
+
+* config.assets.enabled
+
+1.1 Main features
+------------------------------------------------------------------------
+
+* concatenate assets
+* one master js and css file
+* in production, rails inserts an md5 fingerprint into each filename
+
+* asset minification or compression
+
+* coding assets via a higher level language
+
+1.2 What is fingerprinting and why should I care?
+------------------------------------------------------------------------
+
+* cache bursting
+
+* query string strategy has several disadvantages
+
+2. How to use the asset pipeline
+------------------------------------------------------------------------
+
+* app/assets directory
+
+* Assets can still be placed in the public hierarchy.
+
+* CoffeeScript is enabled only if coffee-rails is in the Gemfile.
+
+* Need ExecJs to use CoffeeScript.
+
+2.1 Asset Organization
+------------------------------------------------------------------------
+
+* app/assets - assets owned by application
+* lib/assets - library code that doesn't fit into the scope of the application
+* vendor/assets - assets owned by outside entities
+
+2.1.1 Search paths
+------------------------------------------------------------------------
+
+* app/assets/images, javascripts, stylesheets
+
+* in manifest:
+
+    //= require home
+    //= require sub/something
+
+* Rails.application.config.assets.paths
+
+* Adding paths to pipeline. In config.application.rb:
+
+    config.assets.paths << Rails.root.join("app", "assets", "flash")
+
+* Files you want to reference outside a manifest must be added to the
+  precompile array or they will not be available in the production
+  environment.
+
+2.1.2 Using index files
+------------------------------------------------------------------------
+
+* index.js serves as manifest for all files in its directory.
+
+* to require whole library:
+
+    //= require library_name
+
+2.2 Coding links to assets
+------------------------------------------------------------------------
+
+* Same as before.
+
+2.2.1 CSS and ERB
+------------------------------------------------------------------------
+
+* ERB is automatically evaluated
+* Need erb extension
+* asset_path 'image.png'
+* asset_data_uri 'logo.png'
+
+2.2.2 CSS and Sass
+------------------------------------------------------------------------
+
+* sass-rails helpers
+* image-url("rails.png") => url(/assets/rails.png)
+* Shouldn't it be assets/images/rails.png ???
+
+2.2.3 JavaSCript/CoffeeScript and ERB
+------------------------------------------------------------------------
+
+2.3 Manifest files and directives
+------------------------------------------------------------------------
+
+* require
+* require_tree - recursive
+* require_directory - not recursive
+
+* No need to supply extensions
+
+* require_self - css contained within the file
+
+* https://github.com/rails/sass-rails - use @import instead of require
+
+* multiple sass files - use @import instead of sprocket directives
+
+2.4 Preprocessing
+------------------------------------------------------------------------
+
+* Should I rename the sass files as css.sass?
+
+3. Development
+------------------------------------------------------------------------
+
+* body param is required by sprockets
+
+3.1 Turning debugging off
+------------------------------------------------------------------------
+
+* config.assets.debug = false
+* concatenates and runs the necessary preprocessors on all files.
+* assets are compiles and cached on the first request
+
+* debug => true can also be set in the rails helper methods
+
+* Can enable compression in development mode and disable it on demand.
+
+4 In production
+------------------------------------------------------------------------
+
+* config.assets.digest
+
+4.1 Precompiling assets
+------------------------------------------------------------------------
+
+* config.assets.prefix - default is public/assets
+
+* bundle exec rake assets:precompile
+
+* config.assets.initialize_on_precompile
+  - partially loads application
+  - templates cannot see application objects or methods
+  - heroku requires this to be false
+
+* capistrano 2.8 load 'deploy/assets'
+  - links config.assets.prefix to shared/assets
+  - so that remotely cached pages that reference old compiled assets still work
+
+* You can bundle install --without assets on the server if you are precompiling
+  locally.
+
+* If you have other manifests or individual stylesheets and javascript files,
+  you can add them to the precompile array:
+
+    config.assets.precompile += ['admin.js', 'admin.css', 'swfObject.js']
+
+* rake task generates a manifest.yml that contain a list of all the assets.
+  - used by rails helpers to avoid handing the mapping back to sprockets.
+  - can be changed: config.assets.manifest
+
+4.1.1 Server configuration
+------------------------------------------------------------------------
+
+    location ~ ^/assets/ {
+      expires 1y;
+      add_header Cache-Control public;
+
+      add_header ETag "";
+      break;
+    }
+
+* sprockets creates a gzipped version of assets using maximum compression
+  ratio
+
+    location ~ ^/(assets)/  {
+      root /path/to/public;
+      gzip_static on; # to serve pre-gzipped version
+      expires max;
+      add_header Cache-Control public;
+    }
+
+4.2 Live compilation
+------------------------------------------------------------------------
+
+* config.assets.compile = true
+  - all requests for assets are handled by sprockets directly.
+  - uses more memory, performs more poorly than the default
+
+* if deploying to a system without pre-existing JavaScript runtimes,
+  add therubyracer to gemfile.
+
+5. Customizing the pipeline
+------------------------------------------------------------------------
+
+5.1 css compression
+------------------------------------------------------------------------
+
+* config.assets.css_compressor = :yui
+  - requires yui-compressor gem
+  - config.assets.compress must be set to true
+
+5.2 Javascript compression
+------------------------------------------------------------------------
+
+* :closure, :uglifier, and :yui
+* uglifier needs ExecJS
+
+5.3 Using your own compressor
+------------------------------------------------------------------------
+
+    class Transformer
+      def compress(string)
+      end
+    end
+
+    config.assets.css_compressor = Transformer.new
+
+5.4 Changing the assets path
+------------------------------------------------------------------------
+
+    config.assets.prefix = "/some_other_path"
+
+
+5.5 X-Sendfile Headers
+------------------------------------------------------------------------
+
+* let web server serve the file directly
+  - faster
+
+    config.action_dispatch.x_sendfile_header = "X-Sendfile" # for apache
+    config.action_dispatch.x_sendfile_header = 'X-Accel-Redirect' # for nginx
+
+* Only in production and staging
+
+6 How caching works
+------------------------------------------------------------------------
+
+* Uses Rails cache to cache assets in development and production
+
+7 Adding assets to your gems
+------------------------------------------------------------------------
+
+* jquery-rails
+  - gem containing an engine class which inherits from Rails::Engine
+
+8 Making your library or gem a pre-processor
+------------------------------------------------------------------------
+
+* tilt
+
+9 Upgrading from old versions of Rails
+------------------------------------------------------------------------
+
+    #-------------------------------------------------------------------
+    #application.rb
+
+    # Enable the asset pipeline
+    config.assets.enabled = true
+
+    # Version of your assets, change this if you want to expire all your assets
+    config.assets.version = '1.0'
+
+    # Change the path that assets are served from
+    # config.assets.prefix = "/assets"
+
+    #-------------------------------------------------------------------
+    # development.rb
+
+    # Do not compress assets
+    config.assets.compress = false
+
+    # Expands the lines which load the assets
+    config.assets.debug = true
+
+    #-------------------------------------------------------------------
+    # production.rb
+
+    # Compress JavaScripts and CSS
+    config.assets.compress = true
+
+    # Choose the compressors to use
+    # config.assets.js_compressor  = :uglifier
+    # config.assets.css_compressor = :yui
+
+    # Don't fallback to assets pipeline if a precompiled asset is missed
+    config.assets.compile = false
+
+    # Generate digests for assets URLs.
+    config.assets.digest = true
+
+    # Defaults to Rails.root.join("public/assets")
+    # config.assets.manifest = YOUR_PATH
+
+    # Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
+    # config.assets.precompile += %w( search.js )
+
+    #-------------------------------------------------------------------
+    # test.rb
+
+    config.assets.compile is true
+    config.assets.compress, config.assets.debug and config.assets.digest are false.
+
+    #-------------------------------------------------------------------
+    # gemfile
+
+    # Gems used only for assets and not required
+    # in production environments by default.
+    group :assets do
+      gem 'sass-rails',   "~> 3.1.0"
+      gem 'coffee-rails', "~> 3.1.0"
+      gem 'uglifier'
+    end
+
+    #-------------------------------------------------------------------
+    # config/application.rb
+
+    if defined?(Bundler)
+      # If you precompile assets before deploying to production, use this line
+      Bundler.require *Rails.groups(:assets => %w(development test))
+      # If you want your assets lazily compiled in production, use this line
+      # Bundler.require(:default, :assets, Rails.env)
+    end

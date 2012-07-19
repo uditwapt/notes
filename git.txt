@@ -1,0 +1,317 @@
+Git
+========================================================================
+
+Trace a failing git alias
+-------------------------------------------------------------
+
+Problem: you're getting the error: "fatal: cannot exec '...': Permission denied"
+
+strace can help finding the entry that is returning EACCES, as in: strace -f -e execve git foobar
+
+find commits with ticket number
+------------------------------------------------------------------------
+git log --oneline --grep=#728
+
+
+push a tag
+------------------------------------------------------------------------
+
+git tag -a <name>
+git push origin tag <name>
+
+restore deleted file
+------------------------------------------------------------------------
+git checkout HEAD^ file
+
+uncommit
+------------------------------------------------------------------------
+
+leave changes intact, but bump down the revision
+
+git reset HEAD^
+
+http://twigstechtips.blogspot.com/2009/10/git-uncommit-revision-but-keep-changes.html
+
+reset
+------------------------------------------------------------------------
+
+
+edit commit messages
+------------------------------------------------------------------------
+
+git rebase --interactive $parent_of_flawed_commit
+
+
+Import an svn repository
+------------------------------------------------------------------------
+
+svn2git http://nerveman@svn.assembla.com/svn/unico --exclude vendor/rails --exclude vendor/gems
+
+
+gitimmersion.com
+========================================================================
+
+1. setup
+
+  - set up name and email
+  - set up line ending preferences
+
+    - linux
+      - autocrlf input
+      - safecrlf true
+
+    - windows
+      - autocrlf true
+      - safecrlf true
+
+2. more setup
+
+9. changes, not files
+
+  - git focus on the changes to a file rather than the file itself.
+
+10. history
+
+  - git log --pretty=oneline
+  - options
+    max-count
+    since
+    until
+    author
+    all
+
+  - git log --pretty=format:"%h %ad | %s%d [%an]" --graph --date=short
+
+  - gitk
+
+11. aliases
+
+  - shell aliases
+    - .profile
+    - alias <alias>='<command>'
+
+12. getting old versions
+
+  - git checkout <hash>
+  - detached HEAD
+  - git checkout master
+
+13. tags
+
+  - git tag v1^
+    - before v1
+
+  - git hist master --all
+    - adds tags in view
+
+14. undoing local changes (before staging)
+
+15. undoing staged changes (before committing)
+
+16. undoing committed changes
+
+  - git revert HEAD --no-edit
+
+17. removing commits from a branch
+
+  - reset rewrites the current branch to point to the specified commit
+  - git reset --hard v1
+
+  - git hist --all
+    - will show resetted changes
+
+  - if a commit is unreferenced remain, it will remain in the repository
+    until the system runs the garbage collection software.
+
+19.
+
+  - git commit --amend
+
+22. git internals: the .git directory
+
+  - .git/objects
+    - directory names are first two letters of sha1 hash
+  - .git/objects/<dir>
+    - compressed, encoded
+  - .git/config
+
+  - ls .git/refs
+  - ls .git/refs/heads
+  - ls .git/refs/tags
+
+  - cat .git/HEAD
+
+23. git internals: working directly with git objects
+
+  - git cat-file -t
+    - git type
+  - git cat-file -p
+    - git dump
+
+  - finding the (directory) tree
+    git dump (commit, tree, blob)
+
+27. viewing diverging branches
+
+  - git hist --all
+    - displays all branches
+
+32. resetting the greet branch
+
+  - so you reset a _branch_
+
+34. rebasing
+
+  - git rebase others
+    - other's changes first before mine
+    - only the current branch is affected
+
+  - don't rebase
+    - if the (current) branch is public
+    - when the exact history of the commit branch is important
+
+  - use for short-lived local branches
+
+35. merging back into master
+
+  - fast forwarding moves the branch pointer to the same commit as the other branch
+
+37.
+
+  - git clone hello cloned_hello
+    - you can clone a local repo!
+
+38.
+
+  - clone will refer to origin's branches
+
+39.
+
+  - git remote
+  - convention to use "origin" for the primary centralized repo
+
+40.
+
+  - branches in the remote repo are not treated as local branches
+
+42.
+  - git fetch
+    - gets the commits from the repo but does not integrate them to the local branches
+
+43.
+
+  - git merge origin/master
+
+46.
+
+  - git clone --bare hello hello.git
+  - convention is *.git is for bare repositories
+  - bare repo
+    - no working directory
+    - just the .git of a non-bare repo
+
+47.
+
+  - git remote add shared ../hello.git
+    - adds a remote repo to a local repo
+
+48.
+
+  - git push shared master
+
+Merge
+========================================================================
+
+- resolve conflicts
+
+    git mergetool
+
+submodules (http://progit.org/book/ch6-6.html)
+========================================================================
+
+- starting with submodules
+
+  - git submodule add git://github.com/chneukirchen/rack.git rack
+  - adds .gitsubmodules dot file
+
+  - git doesn't track the contents of the submodule unless you're in the submodule's directory.
+  - git records the particular commit from the submodule's repository.
+
+- cloning a project with submodules
+
+  - git clone git://github.com/schacon/myproject.git
+  - git submodule init
+  - git submodule update
+
+- issues with submodules
+
+  - the submodule points to a specific commit, not to a branch (???)
+  - always create a branch in the submodule directory
+  - submodules exist only in branch they are created (???)
+  - if you want to change a directory to a submodule, you need to unstage the directory when deleting it.
+
+
+http://gitready.com/beginner/2009/02/02/push-and-delete-branches.html
+========================================================================
+
+delete a remote branch
+
+git push origin :<name>
+
+
+http://progit.org/2010/08/25/notes.html
+========================================================================
+
+Notes to Self
+-------------
+
+- git notes add HEAD
+  - add note to HEAD
+  - overwrites note
+
+- git log
+  - shows notes
+
+- git notes append
+  - only in 1.7
+
+Notes Namespaces
+----------------
+
+- notes namespaces
+  - default namespace is commits
+
+- git notes --ref=bugzilla add
+  - adds notes to bugzilla namespace
+
+- git log --show-notes=bugzilla
+  - shows notes from bugzilla namespace
+
+- git log --show-notes=*
+  - all the notes
+
+Sharing notes
+-------------
+
+- notes are stored as references, like branches and tags.
+- master == refs/heads/master
+
+- git push origin refs/notes/*
+
+Getting notes
+-------------
+
+- git fetch origin refs/notes*:refs/notes*
+
+- Or, add fetch = +refs/notes/*:refs/notes/* to .git/config
+  - git fetch origin will now get all the note references on the server and store them as though they were local notes
+
+Collaborating on notes
+----------------------
+
+- if you pull down someone's notes, you edit any note in a namespace locally
+- you have to check out your notes as if it were a normal branch, and do a merge and switch back
+
+
+
+

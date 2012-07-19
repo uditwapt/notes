@@ -1,0 +1,25 @@
+/home
+screensaver
+
+compizconfig-settings-manager
+
+add /var/lib/gems/1.8/bin to path
+
+chrome
+geany
+ruby-full, rubygems
+nokogiri - http://nokogiri.org/tutorials/installing_nokogiri.html
+vim
+git
+
+mysql
+bundler
+regexxer
+meld
+diakonos
+
+national geographic
+flash
+gstreamer
+gimp
+bittorrent

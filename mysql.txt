@@ -1,0 +1,14 @@
+write data to sql file
+------------------------------------------------------------------------
+
+mysqldump -u root hiowaaspree > tmp/2011-01-12.sql
+
+write data from sql file
+------------------------------------------------------------------------
+
+mysql --user root dev_storage < files/tmp/20110102000008.storage.sql
+mysql --user root dev_main < files/tmp/20110102000010.main_db.sql
+
+
+describe table
+------------------------------------------------------------------------

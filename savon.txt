@@ -1,0 +1,157 @@
+savon
+========================================================================
+
+preqequisites
+------------------------------------------------------------------------
+
+* soap
+* wsdl
+* soapui
+
+
+getting started
+------------------------------------------------------------------------
+
+Savon::Client
+  - represents a soap service
+  - lets you configure and execute soap requests
+  - created from a wsdl document
+
+.new method yields the following objects: wsdl, http, wsse
+
+client = Savon::Client.new do |wsdl, http|
+  ...
+end
+
+client.wsse.credentials
+
+
+the wsdl object
+------------------------------------------------------------------------
+
+* inspecting a service
+
+  wsdl.document = # specifies a remote location
+  wsdl.namespace
+  wsdl.endpoint
+  wsdl.soap_actions
+  wsdl.to_xml
+
+* working without a wsdl
+
+  do not use a wsdl document at least in production
+  directly access the soap endpoint and target namespace instead
+
+
+http object
+------------------------------------------------------------------------
+
+* httpi gem
+* HTTPI::Request is provided by httpi gem
+
+* ssl and http headers
+
+  http.auth.ssl.
+  http.read_timeout
+  http.open_timeout
+  http.headers
+
+* soap action
+
+  required by legacy services
+  http.headers["SOAPAction"] = '"urn:example#service"'
+
+* cookies
+
+  client.http.headers["Cookie"] = response.http.headers["Set-Cookie"]
+
+
+wsse object
+------------------------------------------------------------------------
+
+* simple wsse authentication
+
+  wsse.credentials "username", "password"
+
+* digest authentication
+
+  wsse.credentials "username", "password", :digest
+
+* timestamp
+
+  wsse.timestamp = true
+  wsse.created_at = Time.now
+  wsse.expires_at = Time.now + 60
+
+* custom tags
+
+  autovivificating hash
+  wsse["wsse:Security"]["wsse:UsernameToken"] = { "Organization" => "ACME" }
+
+
+executing soap requests
+------------------------------------------------------------------------
+
+* response = client.request :get_all_users
+
+* will parse the wsdl document for available soap actions
+
+* if there's no wsdl, the arument will be converted to lowerCamelCase
+
+* client.request "GetPDF" - no conversion done
+
+* this sets the SOAP input tag inside the request
+
+* oftentimes, you need to prefix the input tag with the target namespace of your service:
+
+  response = client.request :wsdl, :get_all_users
+    <wsdl:getAllUsers />
+
+response = client.request :wsdl, 'GetPDF', :id => 1
+
+response = client.request do |soap, wsdl, http, wsse|
+  # ...
+end
+
+soap is tied to single requests
+
+
+soap object
+------------------------------------------------------------------------
+
+* soap version
+
+  default soap version is 1.1
+  soap.version = 2 # 1.2
+
+* namespaces
+
+  soap.namespace["xmlns:g2"] = "http://g2.example.com"
+
+* soap body
+
+  client.request :get_user do
+    soap.body = {:id => 1}
+  end
+
+  :order! => [:first_name, :last_name]
+
+  :attributes! => {:last_name => {"xsi:nil" => true}}
+
+
+  soap.body do |xml|
+    xml.firstName "The"
+    xml.lastName "Hoff"
+  end
+
+*
+
+
+
+
+
+
+
+
+
+

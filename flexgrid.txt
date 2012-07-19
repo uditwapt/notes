@@ -1,0 +1,35 @@
+http://jclem.github.com/flexgrid/
+========================================================================
+
+Setup
+------------------------------------------------------------------------
+
+1. $container-width
+2. $num-columns
+3. $column-width
+
+
+Usage
+------------------------------------------------------------------------
+
+  #make-magic-happen
+    @include cols(4)
+
+  #usage-example
+    @include cols(5)
+    @include last
+
+A compromise
+------------------------------------------------------------------------
+
+@mixin respond-1020($cols)
+  @media screen and (max-width: 1020px)
+    include cols($cols)
+
+.an-element
+  @include response-1020(9)
+
+https://github.com/jclem/flexgrid/blob/gh-pages/sass/_grid_ext.scss
+
+
+

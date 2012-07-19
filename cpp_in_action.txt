@@ -1,0 +1,1056 @@
+C++ In Action
+
+================================================================================
+Language: Objects and Scopes
+================================================================================
+
+===== Global Scope =============================================================
+
+World TheWorld; // Declaration AND instantiation. In Java, this would be just declaration.
+
+~World() // DECRONSTRUCTOR
+
+===== Local Scope ==============================================================
+
+Objects in local scope - automatic; stack objects
+
+An object is something that has identity.
+
+const int _identifier; // Read only. Can only be set in the constructor's preamble (Are the constructors the only ones that can have preambles?)
+
+===== Embedded objects =========================================================
+
+the has-a relationship
+
+private:
+    const int      _identifier;
+    const Matter   _matter;     
+    // Since they are const, if these constructors need arguments, they must be passed in the preamble.
+    
+    // Data members are initialized in the order in which they appear in the class definition. They are destroyed in the reverse order of construction.
+    
+===== Inheritance ==============================================================
+
+the is-a relationship
+
+class Star: public CelestialBody // inheritance. Note the public in the middle.
+
+ Star (double mass, double brightness)
+        : CelestialBody (mass), _brightness (brightness)
+// The base class in initialized in the preamble of the derived class. 
+
+/* 
+  First the base class is fully constructed, then the derived class. Then,
+  the derived class destructor is called first, the destructor of the base class 
+  follows.
+*/
+
+===== Member Functions and Interfaces ==========================================
+
+int GetValue () const {  return _num; } // READ-ONLY METHOD
+
+// only methods declared const may be called on a const object
+
+===== Member Function Scope ====================================================
+
+#include <iostream> // includes iostream library
+
+using std::cout;      
+using namespace std; // uses std namespace 
+
+InputNum
+calling convention
+arithmetic operators
+
+InputNum (char msg []) 
+// A string is a null terminated array of chars. LITERAL strings are zero terminated; that is, after the last explicit character, a null char is added by the compiler. There is a special string type defined in the standard library.
+
+int GetValue () const {  return _num; } // is an INLINE function
+
+===== Types ====================================================================
+
+Built-in data types
+
+typedef unsigned long ULONG;
+//  Gives a different name to any type--built-in or user defined.
+
+===== Abstract Data Types ======================================================
+
+const int maxStack = 16;
+
+function declaration - the header
+function definition - includes the code
+
+#include <cassert>
+// write #define NDEBUG before including cassert to disable assertions
+
+//  implementation file - details of the implementation of some member functions 
+//  interface file 
+//    - declaration of the class
+//    - declarations of all the data members. Ends with semicolon.
+//    - traditionally, defined in header files with the .h extension.
+
+int _arr [maxStack]; 
+// The size of an array has to be a constant.
+
+void IStack::Push (int i)
+// when the definition of a member function is taken out of the context of the class definition, its name has to be qualified with the class name.
+
+const char SumString [] = "The sum is   "; 
+// You don't have to specify the size when the array is explicitly initialized.
+
+Inline functions 
+// Function definition is embedded inside the definition of the class.
+// Instead of generating a function call, the program will try to generate the 
+// actual code of an inline function right on the spot where it was invoked.
+// If it contains a single statement, it is usually cheaper execution-wise and 
+// code-size-wise to make it inline.
+
+Non-inline functions
+// Definition of the member function is taken out of the class.
+// Function name has to be qualified with the class name.
+// ex. int IStack::Pop ()
+
+================================================================================
+Language: Arrays and References
+================================================================================
+
+===== References ===============================================================
+
+the has-access-to relationship
+- not "destructive" like the others
+
+int & iref = i; 
+// REFERENCE. Nothing can make iref point to anything other than i.
+// A reference cannot be created without being initialized.
+// If a reference is stored within an object, it must be initialized in the 
+// preamble to the constructor of that object.
+
+class IStack
+{
+    friend class StackSeq; 
+    // FRIEND gives StackSeq access to IStack's private members
+    // StackSeq can access private data of IStack, but not the other way around.
+    ...
+}
+
+IStack const & _stack;  
+// A const reference cannot be used to change the object it refers to.
+// A reference to const can refer to any object
+// A reference that is not const cannot refer to a const object
+// References must be initialized in the preamble
+
+// Function with a pass by reference
+StackSeq::StackSeq (IStack const & stack)
+    : _iCur (0), _stack (stack) // init reference
+{}
+...
+IStack const &  _stack;
+// _stack is a reference. stack (in StackSeq) is also a reference. stack is 
+// assigned to _stack in the preamble of StackSeq::StackSeq with the following 
+// expression: _stack (stack) 
+
+// Function call
+IStack TheStack;          
+StackSeq seq (TheStack);
+// Note that the referencing is done INSIDE the constructor. Unless you read the
+// declaration of the StackSeq constructor, you can't tell whether it's pass by
+// value or by reference.
+
+// As a general rule, assume that objects are passed by reference, built-in 
+// types by value.
+
+===== Stack-based calculator ===================================================
+
+// Function that returns a const reference
+// _stack is an object, not a reference to an object. However, it is returned 
+// by GetStack as a reference. Or more accurately, GetStack returns a reference
+// to _stack. 
+IStack const & GetStack () const
+{
+    _done = true;
+    return _stack;
+}
+// const & before GetStack - refers to the return value
+// const after GetStack() - refers to the method; it's a read-only method.
+
+#if !defined input_h   // prevent multiple inclusions
+#define input_h
+...
+#endif // put at end of file
+
+#include <cctype> // character type
+
+#include <cstdlib> // standard library
+
+================================================================================
+Language: Pointers
+================================================================================
+
+===== Pointers vs. References ==================================================
+
+// Reference: immutable
+// Pointer: mutable
+
+int *pValue;          // declaration of pointer
+int TheValue = 10;
+pValue = &TheValue;   // pointer points to address of TheValue
+int i = *pValue;      // i gets the value in the address pointed to by pValue
+*pValue = 20;         // value in address pointed to by pValue is changed to 20
+
+pStack->Push (7);     // (*pStack).Push (7)
+
+References rule.
+
+===== Pointers and Arrays ======================================================
+
+We can access a pointer as if it were an array--that is using an index. Conversely, we can use a pointer to access elements of an array
+
+Don’t use pointers where an index will do.
+
+===== Pointers and Dynamic Memory Allocation ===================================
+
+Pointers are invaluable whenever dynamic data structures are involved.
+
+// new operator allocates to the HEAP.
+
+int * pNumber = new int (2001); 
+// Using 'new' to allocate memory. Initialized with value 2001.
+// The initialization is mandatory when allocating an object that has a 
+// constructor.
+
+int* pNumbers = new int [n];
+// allocates array of n integers
+// if we want array of objects, object must either (1) have no constructors, or
+// (2) have a constructor with no arguments
+
+delete pStar; // calls destructor automatically. de-allocates memory.
+
+delete [] pNumbers; // we put the brackets in front of the pointer name
+// will delete an array of objects (not pointers to objects).
+
+// If array of pointers, you have to manually delete each element in the array.
+
+// The rule of thumb is: Try to allocate memory in the constructor of an object and deallocate it in its destructor. 
+
+// Don’t check for a null pointer before calling delete—delete will do it for 
+// you anyway
+
+//  During program termination all memory is freed.
+
+===== Dynamic Stack ============================================================
+
+int * _arr; //  A dynamically allocated array has to be declared as a pointer.
+
+// Object A OWNS object B if object A is responsible for object B’s deallocation
+
+arr = arrNew; // pointer assignment.
+
+===== Linked List ==============================================================
+
+// The definition of Link is self-referencing--a Link contains a pointer to a Link. This is ok because of the "class Link" declaration.
+
+List (): _pHead (0) {} // assigns the _pHead to 0 in the preamble
+...
+Link* _pHead; 
+
+Link const * GetHead () const;
+Link const * pLink = list.GetHead (); 
+// GetHead returns a pointer to a constant Link. The variable we assign it to 
+// must therefore be a pointer to a const Link, too.
+
+Link const * pLink; 
+const Link * pLink; 
+// pointer to const - a pointer through which one cannot write.
+
+Link * const pLink = pInitPtr;  
+// const pointer - pointer that cannot be moved
+
+===== String Table =============================================================
+
+array index -> offset -> string
+
+is offStr the index of the offset or the offset itself?
+
+p = &arr [n];  
+// address of the n’th element of arr
+// &arr [n] == arr + n
+
+cstring // string library
+
+===== Hash Table ===============================================================
+
+
+================================================================================
+Language: Polymorphism
+================================================================================
+
+===== The Meaning of is-a ======================================================
+
+// Use VIRTUAL to implement polymorphism
+// POLYMORPHISM only works when argument is a pointer to an object? Cannot be reference?
+
+===== Parse Tree ===============================================================
+
+// Use switch statements only when polymorphism cannot be used.
+
+// Abstract classes are the classes that cannot be instantiated, they only serve 
+// as parents for other classes.
+
+virtual double Calc () const = 0; 
+// The function that has no implementation (inherited or otherwise) is called 
+// PURE VIRTUAL. That's the meaning of = 0 in the declaration of Calc. 
+
+// A class that has one or more pure virtual functions is called an ABSTRACT 
+// CLASS and it cannot be instantiated (no object of this class can be created).
+
+// Once we decide to pay the overhead of a vtable pointer, all subsequent 
+// virtual functions don't increase the size of the object.
+
+virtual ~Node () {}
+// If a class has a virtual function, it probably needs a virtual destructor 
+// as well.
+// A destructor cannot be made pure virtual, because it is actually called by 
+// the destructors of the derived classes.
+
+// public - anybody
+// protected - the class itself, its friends and derived classes
+// private - only the class itself and its friends
+
+AddNode (Node * pLeft, Node * pRight)
+        : BinNode (pLeft, pRight) {}
+// AddNode constuctor calling SUPER BinNode constructor in preamble
+
+================================================================================
+Language: Small Software Project
+================================================================================
+
+===== Stubbed Implementation ===================================================
+
+enum Status
+{
+    stOk,
+    stQuit,
+    stError
+};
+// An ENUM is an integral type that can only take a few predefined values.
+
+atoi (&_buf [_iLook]) 
+// atoi() will stop reading from str as soon as a non-numerical character has been read
+
+AMORPHIC = having no defined shape, lacking form = not good for polymorphism
+
+Scanner just "chops" the input string into discrete tokens.
+
+===== Scanner ==================================================================
+
+_number = strtod (&_buf [_iLook], &p);
+_iLook = p - _buf; // pointer subtraction; address of p minus _address of _buf
+Converts a string to a floating point number, AND ALSO updates the pointer to the first character that cannot possibly be part of the number
+
+char *& pEnd;
+// reference to a pointer
+
+double strtod (char const * str, char ** ppEnd);  //standard library
+double StrToDouble (char const * pBuf, int& iCurrent); // how the author would've done it
+
+void Scanner::SymbolName (char * strOut, int & len) 
+// len should be initialized by the caller to the size of the buffer strOut.
+
+if (max data size well defined)
+{
+    use caller’s fixed buffer
+    // callee is aware of max data size
+}
+else if (it's cheap to ask for size)
+{
+    use caller-allocated buffer
+    // caller first asks for the size of data, 
+    // allocates the appropriate buffer and 
+    // calls the method to fill the buffer.
+}
+else if ((caller trusted to free memory
+            && caller uses the same allocator
+            && no problems with remoting)
+        || returning dynamic data structures)
+{
+    use callee-allocated buffer
+    // The most likely complication is a memory leak when the caller forgets to 
+    // deallocate the buffer (which, we should remember, hasn’t been explicitly 
+    // allocated by the caller).    
+}
+else
+{
+    use caller-re-allocated buffer
+    //  the caller allocates the buffer of some arbitrary size that covers, say, 
+    // 99% of the cases. When the data does not fit into the buffer, the callee 
+    // returns the appropriate failure code and lets the caller allocate a 
+    // bigger buffer.
+}
+
+===== Symbol Table =============================================================
+
+HTable (int size)
+HTable table (13);  // this, is equal to   
+table = 13;         // this.
+// c++ allows implicit conversions by default
+
+explicit HTable (int size): _size (size)
+// explicit prevents implicit conversions
+
+METHOD NAME OVERLOADING is ok 
+
+HTable (int size = 127); // constructor with a DEFAULT value for a parameter
+
+                            symbol table
+      hash table          array of offsets            string buffer
+string -> list of IDs   id == index -> offset        offset -> string
+
+ int     * _offStr; 
+ _offStr = new int [size]; 
+ // dynamic array
+
+===== Store ====================================================================
+
+      symbol table             store
+      string -> id    id -> memory cell -> value 
+ 
+class SymbolTable; // forward declaration
+// instead of including symtab.h
+// As long as we are only using pointers or references to SymbolTable, this will 
+// do. Forward declaration would not be sufficient if we wanted to call any of
+// the methods of SymbolTable
+
+// On most computer architectures it is cheaper to retrieve data from memory if 
+// it's aligned on 32-bit or 64-bit boundary.
+
+id -> is an index -> to an array of offsets -> to a buffer of string
+
+===== Function Table ===========================================================
+
+A switch statement that uses a set of consecutive labels, 0, 1, 2, etc., is implemented by the compiler as a jump table with a constant switching time independent of the number of labels.
+
+meta-code 
+- steps to be taken to implement the most likely extension to the program, as well as the assertions that have to be preserved when making such extensions.
+
+It is almost always a good idea to shift the complexity from code to data structures.
+
+double (* pFun) (double x);
+// pFun is a pointer to a function taking a double and returning a double.
+
+pFun = sin;
+// assignment. The name of the function is the address of the function
+
+double y = (* pFun) (x);
+// dereferencing pFun
+
+typedef double (*PtrFun) (double);
+// creates a new type def called PtrFun which is a pointer to a function...
+
+class FunctionEntry
+{
+public:
+    PtrFun pFun;
+    char* strFun;
+};
+// all its non-static data members are public and there is no base class, no virtual functions and no user-defined constructor. Can be explicitly initialized like
+FunctionEntry funArr[maxIdFun] =
+{ 
+    log,    "log",
+    log10,  "log10",
+    .... 
+};    
+
+            FunctionTable
+symbol table        function pointer array
+string -> id        id -> index -> function
+
+===== Nodes ====================================================================
+
+AssignNode (Node * pLeft, Node * pRight)
+// Why not AssignNode (VarNode * pLeft, Node * pRight) and remove lvalue???
+// Because of Node * pNode = Term () in Parser::Expr()
+
+virtual void Assign (double value) {}
+// Why add Assign in Node? Why not just add Assign in VarNode???
+// Because of _pLeft->Assign (x) in AssignNode::Calc
+
+===== Parser ===================================================================
+
+===== Main =====================================================================
+
+===== Initialization of Aggregates =============================================
+
+An object of a given class can be explicitly initialized if and only if 
+- all its non-static data members are public and 
+- there is no base class, 
+- no virtual functions and 
+- no user-defined constructor.
+
+BigInitializable big = { { 1, "Literal String", &foo }, 3.14 };
+// You can nest initializations.
+
+Scanner::Scanner (Scanner const & scanner); 
+// copy constructor
+
+Initializable init [2] = { 
+        { 1, "Literal String", &foo1 }, 
+        { 2, "Another String", &foo2 } };
+        
+CelestialBody solarSystem [] = { 0.33, 4.87, 5.98, 0.64, 1900, 569, 103, 0.66 };
+// If objects in the array have single-argument constructors, you can specify these arguments in the initializer list.
+
+===== Operator Overloading =====================================================
+
+===== Passing by Value =========================================================
+
+Parser (Scanner scanner, ... ){ ... }
+// Makes a temporary copy of scanner. This temporary copy of the scanner will disappear as soon as the execution of the Parser's constructor is finished. The parser will store a reference to it in its member variable, but after the end of construction the reference will point to a nonexistent scratch copy of a scanner.
+
+Scanner         _scanner;
+// If we decide to pass a copy of the scanner to the parser, we should also store a copy of the scanner inside the parser.
+
+Scanner::Scanner (Scanner const & scanner);
+// copy constructor
+// possibly const
+
+IStack const GetStack () const { return _stack; }
+// IStack is now returned by value
+
+//  default copy constructor = shallow copy
+// Beware of default copy constructors!
+// Beware of default assignments!
+// Beware--many a bug in C++ is a result of a missing ampersand.
+
+returning an object by value:
+1.1. The compiler pre-allocates some scratch space on the internal call stack.
+1.2. Scratch space is then passed to the function being called.
+1.3. GetStack calls IStack's COPY CONSTRUCTOR to copy the value of _stack into scratch space.
+2.1. After returning from GetStack, the ASSIGNMENT OPERATOR is called to copy the value from scratch space to the local variable stk. 
+
+The compiler will not be able to generate a default assignment for classes that contain data members that cannot be assigned outside of the constructor's preamble, like const members and references. These restrictions, However, don't apply to the default copy constructor.
+
+----- Value Semantics ----------------------------------------------------------
+
+private:
+    IStack (IStack const & i);
+    IStack & operator = (IStack const & i);
+// protects against default copy constructor and operator =.. because they're 
+// private!!
+
+new is much more expensive than using copy constructor
+
+Value (Value const & v) // copy constructor
+
+Value & operator= (Value const & v) // assignment operator
+
+Value val (1);
+val = val;
+// Beware. Assigning an object to itself.
+
+friend Value operator+ (Value const & v1, Value const & v2 ); //declaration
+inline Value operator+ (Value const & v1, Value const & v2 )  // definition
+val3.operator= (operator+ (val1, val2));
+// Note that both arguments SHOULD BE constant references
+
+// overloading operator +
+// operator+ is NOT a method of Value. Instead it is a free function. Hence, the 
+// friend and inline keywords (I think)
+// two value arguments returning a new value
+
+Value Value::operator+ (Value const & val) const
+val3.operator= (val1.operator+ (val2));
+//  the two addends are treated in the "method" implementation is not symmetric, that is, 
+  Value operator+ (int i, Value const & val); 
+  Value vSum = 10 + v;
+does not have an equivalent "method" implementation.
+
+A constructor that takes a single argument, defines an implicit conversion from the type of its argument to its own type.
+
+The compiler converts an int into a CONST REFERENCE to Value by
+1. creating a temporary Value, 
+2. initializing it with an integer 
+3. passing a const reference to it to the called function
+
+The compiler will refuse to do implicit conversions to non-const references BECAUSE the conversion uses a "temporary", which the called function expects to change (since it's non-const).    
+
+Value & operator= (Value const & v)
+// return object (reference to Value) is used in v1 = v2 = v3
+
+Why return the result of addition by value instead of it by reference? Because
+1. You have to create a new object to store the result 
+2. You can't create it in the stack as a local variable since it will quickly disappear after you return from operator+.
+3. You can't create it in the heap using new, you'll never be able to delete it (since you're referencing it?).
+
+================================================================================
+Techniques
+================================================================================
+
+===== Code Review 1: The Cleanup ===============================================
+
+Main deserves a .cpp of its own.
+
+Don’t try to generalize until there's a need for it.
+
+input and output = same level
+
+cerr << "Error: division by zero\n";
+
+----- Fighting Defensive Programming -------------------------------------------
+
+"Defensive programming" hides bugs.
+
+Null termination is an implementation detail.
+
+The sizeof operator returns the size (in bytes) of its argument.
+
+Don’t use the same name for different variables 
+If operator sizeof returns 4 when applied to an array, don’t blame the compiler.
+
+----- A Case of Paranoid Programming -------------------------------------------
+
+Make global variable names less abbreviated.
+
+The whole idea of FunctionArray was to be able to statically initialize it--compile-time instead of run-time.
+
+private:
+    static FunctionEntry  _functionArray [];
+...
+FunctionEntry FunctionTable::_functionArray [] =
+{
+    log, "log",
+    …
+};
+// I made FunctionArray static, which means that it was invisible outside of the file funtab.cpp where it was defined.
+
+static <- opposite of -> extern
+
+class FunctionTable
+{
+    …
+private:
+    static FunctionEntry  _functionArray [];
+    …
+};
+// Unfortunately, when _functionArray is made a static member with undefined size (look at the empty brackets in the declaration), the sizeof operator does not return the initialized size of the array, as we would like it. SINCE THE SIZEOF OPERATOR BASES THE SIZE OF THE ARRAY IN ITS DECLARATION, NOT THE IMPLEMENTATION.
+
+const int maxLen = 10;
+// This is a acceptable in header files since it is const. The linker wouldn’t complain that it is initialized in multiple files. 
+
+----- Improving Communication Between Classes ----------------------------------
+
+ListSeq * HashTable::Find (char const * str);  
+// The sequencer would be allocated inside Find using new and would have to be deleted once the sequencing is finished. THIS IS BAD BECAUSE YOU DO NOT WANT CALLED METHODS TO ALLOCATE NEW OBJECTS AND DEPEND ON THE CALLEE TO DEALLOCATE THEM. 
+
+Instead of this:
+  ListSeq * HashTable::Find (char const * str);
+Do this:
+  IdSeq seq (_htab, str);
+  
+Our solution to this is object inversion. Instead of creating an auxiliary object inside the callee and making the caller responsible for deleting it, we’ll let the caller create an auxiliary local object (on the stack) which will be freed automatically on exit from the scope.
+
+----- Correcting Design Flaws --------------------------------------------------
+
+Use of Multinode to implement left association
+
+===== Code Review 2: Hiding Implementation Details =============================
+
+----- Using Embedded Classes ---------------------------------------------------
+
+List::Link const *_pLink; 
+// use of embedded class
+
+One way to look at a class declaration is to see it as a collection of methods, data members and types
+
+class Seq
+{
+  ...
+}
+friend Seq;
+Notice, by the way, how I declared Seq to be a friend of List following its class declaration. At that point the compiler knows that Seq is a class.
+
+----- Combining Things using Namespaces ----------------------------------------
+
+namespace Function
+{
+    class Table
+    {
+        ...
+    };
+}
+    
+namespace Function
+{
+    class Table;
+}
+// forward declaraion of a class under a namespace
+
+As a general rule, a lot of traditional naming conventions for classes, functions and objects are being replaced in modern C++ by by the use of embedding classes or namespaces and scope resolution prefixes.
+
+----- Hiding Constants in Enumerations -----------------------------------------
+
+enum { idNotFound = -1 };
+// We don’t even have to give names to enums—they can be anonymous.
+ 
+global const 
+  - for typed constants
+  - for generic integral type constant with large scopes
+
+enum 
+  - for generic integral type constant and needed by one class only or a closely related group of classes
+  
+#define
+  - avoid it at all costs
+  
+class SymbolTable
+{
+public:
+    // Embedded anonymous enum
+    enum { idNotFound = -1 };
+    …
+}
+
+SymbolTable::idNotFound
+// idNotFound qualified with the name of the class where it's embedded.
+
+A constant that is only used within a single code fragment should not, in general, be exposed in the global scope. 
+
+===== Code Review 3: Sharing ===================================================
+
+There will always be some tunable parameters in your program whose change will require recompilation. Their place is in params.h.
+
+Even user-tunable parameters should have default values in params.h.
+
+------ Testing Boundary Conditions ---------------------------------------------
+
+Whatever boundaries we don't hit, our users will!
+
+#if 0
+  // production
+  const int maxBuf = 100;     // size of input buffer
+#else
+  // debug  
+  const int maxBuf = 8;     // size of input buffer
+#endif
+// 0 == false, debug
+
+A good debug runtime will do a heap check when your program frees memory. A heap check should discover such problems as buffer overflows, double deletions, etc.
+
+char buf [maxBuf+1];
+// ...
+cin.getline (buf, maxBuf+1);
+if (strlen (buf) == maxBuf)
+{
+    cerr << "Error: Input buffer overflow\n";
+    status = stError;
+    break;
+}
+// I increased the size of the buffer by one, so that I could grab one character more than the self-imposed limit.
+
+----- Templates ----------------------------------------------------------------
+
+To turn List into a template, you need to preface its class definition with template <class T>
+
+List<int> myList;
+
+we have to put all the method implementations in the same header file as the template class definition
+
+// constructor
+template <class T>
+List<T>::List ()
+    : _pHead (0)
+{}
+// Note the template <class T> before each List<T>:: 
+
+The second part of "templatization" is to substitute all the uses of List of integers with List<int>
+
+===== Code Review 4: Removing Limitations ======================================
+
+----- Dynamic Arrays -----------------------------------------------------------
+
+It is less trouble to use dynamic arrays than it is to deal with limitations.
+
+T operator [] (int i) const;
+T & operator [] (int i);
+// One method is constant and the other is not. When acting on a const object, the compiler will pick the const method, otherwise it will use the non-const one.    
+    
+The non-const, reference-returning version of the operator allows us to use the result of array indexing as an lvalue. The following statement "does the right thing" 
+a [3] = 11;
+
+The this pointer is the pointer to the object upon which a given method was invoked.
+
+Foo * const this; // inside a non-const method
+Foo const * const this; // inside a const method
+
+If you want to have a method that can be used as an lvalue, because it returns a reference to the object's data, such method cannot be const. 
+
+If you also want to overload the same method (that is have another method with the same name and argument types) to provide read-only access, you can do it by making the second method const. Its return type must be different, though.
+
+In any case, it should be obvious that it is very important to be consistent--the two overloads should give access to the same piece of data.
+
+----- Separating Functionality into New Classes --------------------------------
+
+You need a new class when there are 
+- too many local variables in a function, 
+- too many data members in a class or 
+- too many arguments to a function.
+
+enum { stNotInit, stInit }; // unsigned char
+
+----- Vectors ------------------------------------------------------------------
+
+typedef std::vector<Node *>::iterator NodeIter;
+for (NodeIter it = _aChild.begin (); it != _aChild.end (); ++it)
+    delete *it;
+
+std::vector<Node *> & vec // ito yata ang tamang syntax
+
+class NodeSeq
+{
+public:
+    ....
+private:
+    std::vector<Node *>::iterator _cur;
+    std::vector<Node *>::iterator _end;
+};
+// two private iterators, instead of an iterator and a reference to the vector. Probably less expensive.
+
+Standard Library vector should be used whenever a resizable array is needed.
+
+===== Code Review 5: Resource Management =======================================
+
+void NewHandler ()
+{
+    cerr << "Out of memory\n";
+    exit (1);
+    // not reached
+    return 0;
+}
+
+set_new_handler (&NewHandler); //preferably at start of main
+// hindi ba dapat walang & yung NewHandler
+
+// The function set_new_handler is defined in the header <new>. It accepts a pointer to a function that's to be called in case new fails.
+
+
+bad_alloc is a class
+
+try
+{
+    ...
+}
+catch (bad_alloc)
+{
+    ...
+}
+catch (...)
+{
+    ...
+}
+
+Always enclose the main body of your program within a try/catch block.
+
+----- Stack Unwinding ----------------------------------------------------------
+
+Once an object is constructed in some local scope, it is ALWAYS automatically destroyed when the flow of control exits that scope.
+
+A few tricky situations:
+
+1.  an object with two embeddings, second throws exception
+    - the destructors of all fully constructed sub-objects are executed
+
+2. object is dynamically allocated using new and its constructor throws an exception
+  - memory allocated by new is automatically freed
+  
+3. the heap object has sub-objects and the constructor of the nth embedding throws an exception
+  - n-1 sub-objects are destroyed and the memory freed
+  
+4. an exception is thrown during the construction of the nth element of an array.
+  -  all the n-1 fully constructed elements are destroyed
+
+5. The array of 65 (cSymInit + 1) lists is constructed in our calculator. Imagine that the constructor of the 8th list throws an exception. 
+  - The destructors of the first seven entries of the array will automatically be called, after which the memory for the whole array will be freed.
+
+once a heap object is FULLY CONSTRUCTED, it (and its parts) will not take part in the process of stack unwinding. <-- kasi baka meron nang nakapoint sa heap object. You will need to manually delete the heap object.
+
+Never perform any action that could throw an exception inside a destructor.
+
+----- Resources ----------------------------------------------------------------
+
+A resource is something that can be acquired and released.
+
+Acquire resources in constructors, release resources in matching destructors.
+
+SymbolTable::SymbolTable (int size)
+    : _size (size), _curId (0), _curStrOff (0), _htab (size + 1)
+{
+    _offStr = new int [size];
+    _bufSize = size * 10;
+    _strBuf = new char [_bufSize];
+}
+// If the second allocation (of _strBuf) failed, the first allocation of _offStr would have never been freed. <-- because it is a object that has been FULLY allocated on the HEAP.
+
+Create sub-objects when more than one data member points to a resource. 
+
+Allocation of resources should either be the last thing in the constructor or be followed by exception safe code.
+
+----- Ownership of Resources ---------------------------------------------------
+
+Forms of ownership:
+1. A block of code owns all the automatic objects defined in its scope.
+2. An object owns all the objects embedded in it.
+
+During their lifetimes, pointers can point to a sequence of resources. Also, several pointers can point to the same resource. The release of such resources is not automated.
+
+----- Weak Pointers ------------------------------------------------------------
+
+When granting or passing access, as opposed to ownership, one should try to use references whenever possible.
+
+A reference cannot express ownership because an object cannot be deleted through a reference (at least not without some trickery).
+
+There are rare cases when using a reference is awkward or impossible. In such cases one can use a weak pointer--a pointer that doesn't express ownership--only access.
+
+----- Smart Pointers -----------------------------------------------------------
+
+do
+{
+    _scanner.Accept();
+    Node * pRight = Term ();
+    pMultiNode->AddChild (pRight, (token == tPlus));
+    token = _scanner.Token();
+} while (token == tPlus || token == tMinus);
+// AddChild might resize its array of children. If this fails, it will throw an exception. The tree pointed to by pRight will never be deallocated.
+
+
+class NodePtr
+{
+public:
+    NodePtr (Node * pNode) : _p (pNode) {}
+    ~NodePtr () { delete _p; } // THIS IS THE IMPORTANT PART
+    Node * operator->() const { return _p; }
+    Node & operator * () const { return *_p; }  
+private:
+    Node * _p;
+};
+
+----- Ownership Transfer: First Attempt ----------------------------------------
+
+When the lifetime of a given resource can be mapped into the lifetime of some scope, we encapsulate this resource in a smart pointer and we're done. When this can't be done, we have to pass the resource between scopes. There are two possible directions for such transfer: up and down.
+
+Node * NodePtr::Release ()
+{
+    Node * tmp = _p;
+    _p = 0;
+    return tmp;
+}
+The important thing about Release is that it zeroes the internal pointer, so that the destructor of NodePtr will not delete the object.
+
+Node * Parser::Expr ()
+{
+    // Parse a term
+    NodePtr pNode (Term ());
+    ...
+    return pNode.Release ();
+}
+// Passing a resource up is a little trickier. Technically, there's no problem. We just have to call Release to acquire the resource from the owner and then return it back
+
+----- Ownership Transfer: Second Attempt ---------------------------------------
+
+NodePtr Parser::Expr ()
+{
+    // Parse a term
+    NodePtr pNode = Term (); // <- assignment
+    ...
+    return pNode; // &lt- by value
+}
+
+NodePtr Parser::Term ()
+{
+    NodePtr pNode = Factor (); // <- assignment
+    ...
+    return pNode; // &lt- by value
+}
+
+The default copy constructor/assignment makes a shallow copy of the object. It means that default copying of a smart pointer doesn't copy the object it points to. That's fine, we don't want a copy of our resource. We end up, however, with two smart pointers pointing to the same resource. That's bad in itself. To make things even worse, one of them is going out of scope--the smart pointer defined inside the procedure. It will delete the object it points to, not realizing that its clone brother has a pointer to it, too. We've returned a smart pointer, all right, but it points to a deleted object.
+
+NodePtr::NodePtr (NodePtr & pSource)
+    : _p (pSource.Release ())
+{}
+
+NodePtr & NodePtr::operator= (NodePtr &amp pSource)
+{
+    if (_p != pSource._p)
+    {
+        delete _p;
+        _p = pSource.Release ();
+    }
+}
+
+Notice that these are not your usual copy constructor and assignment operator. For one, they don't take const references to their source objects. They can't, because they modify them. And modify they do, drastically, by zeroing out their contents. We can't really call it "copy semantics," we call it "transfer semantics."
+
+pNode = auto_ptr<Node> (new AssignNode (pNode, pRight));
+// Ngayon ko lang napansin to ah. I guess this is equivalent to
+
+auto_ptr<Node> temp (new AssignNode (pNode, pRight));
+pNode = temp;
+
+member template - the methods have templates of their own
+up-casting, - they cast the pointer up the class hierarchy
+
+The bottom line is that the assignment of auto_ptrs will only work for those types for which the assignment of pointers works.
+
+Memory resources can be safely kept and transferred from one point to another using auto_ptrs. You can easily transform an existing program to use Resource Management techniques. Just search your project for all calls to new and make sure the resulting pointers are safely tucked inside auto_ptrs.
+ 
+----- Safe Containers ----------------------------------------------------------
+
+std::vector<auto_ptr<Node> > _aChild; // a vector of auto pointers
+// Notice the space left between the two greater-than signs. If you remove this space, the compiler will confuse it with the right-shift operator. 
+
+When we push_back an auto_ptr on such a vector, the re-allocation will definitely happen before the "transfer" assignment. Morover, we could get rid of the explicit MultiNode destructor, because the vector's destructor will destroy all its auto_ptrs which, in turn, will destroy all the nodes. // Huh? Why is that?
+
+size_t?? (parang unsigned int)
+
+We have to search our code for all occurrences of new and release and go through the following series of test: 
+1. Is this a direct transfer to an auto_ptr? 
+2. Or, are we inside a constructor of an object? Is the result of the call immediately stored within the object, with no exception prone code following it in the constructor? 
+3. If so, is there a corresponding delete in the destructor of the object? 
+4. Or, are we inside a method that immediately assigns the result of the call to a pointer owned by the object, making sure the previous value is deleted?
+
+----- Iterators ----------------------------------------------------------------
+
+----- Error Propagation --------------------------------------------------------
+
+===== Making Use of the Standard Template Library ==============================
+
+STL's map template
+- not necessary to provide a method to compare keys for (in-) equality. 
+- map must be able to tell if one key is less than the other. 
+- key type must be directly comparable or have the less-than operator overload.
+
+std::map<char const *, int> dictionary; // naive, and incorrect
+// comparing two pointers
+// pointers could disappear if addresses are in a stack
+
+std::string name (str);
+_dictionary [name] = _id;
+// The mere act of accessing a map using a key will create an entry, if one wasn't there.
+// Logarithmic access 
+
+// equal to:
+std::string name (str);
+std::pair<std::string, int> p (str, _id);
+_dictionary.insert (p);
+
+std::map<std::string, int>::const_iterator it;
+it = _dictionary.find (str);
+// The find method of map returns an iterator. This iterator could either point to the end of the dictionary, or to a pair (key, value).
+
+the standard string has a constructor that accepts a C-string. This constructor can be used for implicit conversions.
+
+Reference Counting and Copy-On-Write -------------------------------------------
+
+void IncRefCount () const { _count++; }
+int DecRefCount () const { return --_count; }
+// The methods IncRefCount and DecRefCount are declared const, even though they modify the object's data. You can do that, without the compiler raising an eyebrow, if you declare the relevant data member mutable.
+    
+    

@@ -1,0 +1,179 @@
+------------------------------------------------------------------------
+* tar zip
+
+tar cvzf unicorn_preview.sql.tar.gz db/unicorn_preview.sql
+
+------------------------------------------------------------------------
+* untar tar.gz
+
+  tar -zxvf *.tar.gz
+
+  wget http://purepistos.net/diakonos/diakonos-0.8.9.tar.gz
+
+------------------------------------------------------------------------
+* display path
+
+  echo $PATH
+
+------------------------------------------------------------------------
+* add directory to path
+
+  - The best place to add a directory to the path of a single user is to modify that user's .bash_profile file.
+  - To add it to all users except user root, add it to /etc/profile.
+  - To also add it to the path of user root, add it to root's .bash_profile file.
+
+    PATH=$PATH:/usr/local/bin:/var/lib/gems/1.8/bin
+    export PATH
+
+------------------------------------------------------------------------
+* find a process
+
+  ps aux | grep lighttpd
+
+------------------------------------------------------------------------
+* convert a video
+
+  mencoder file.ogv -o file.avi -ovc lavc -oac pcm
+
+------------------------------------------------------------------------
+* find a file in a directory
+
+  find -iname '*.orig'
+
+------------------------------------------------------------------------
+* copy a file from a remote server
+
+ scp dev_deployer@flightboard.com:/home/dev_deployer/dev.boutiqueair.com/current/app/views/air/content/faq.html.erb faq.html.erb
+
+------------------------------------------------------------------------
+* passwordless ssh
+
+scp ~/.ssh/id_rsa.pub gmendoza@proto.boutiqueair.com:~/
+ssh gmendoza@proto.boutiqueair.com
+
+mkdir .ssh
+vi .ssh/authorized_keys
+cat id_rsa.pub >> .ssh/authorized_keys
+rm id_rsa.pub
+
+chmod go-w ~
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+
+------------------------------------------------------------------------
+* search for text in the current directory
+
+grep -ir "text" *
+
+------------------------------------------------------------------------
+* Add an existing user to a group
+
+sudo usermod -a -G group user
+
+------------------------------------------------------------------------
+* change the owner and group of a file
+
+sudo chown -Rv user file
+sudo chgrp -Rv user file
+
+------------------------------------------------------------------------
+* see the user's groups
+
+id user
+
+------------------------------------------------------------------------
+* convert midi to wav, enable anti-aliasing, set tempo to 70%
+timidity /home/gsmendoza/Desktop/soto.mid -T 70 -a -Ow -o /home/gsmendoza/Desktop/soto70.wav
+
+------------------------------------------------------------------------
+* present working directly
+
+pwd
+
+------------------------------------------------------------------------
+* customize the command line prompt
+
+/home/user/.bashrc
+
+look for the following line:
+
+PS1='${debian_chroot:+($debian_chroot)}\W$ '
+
+------------------------------------------------------------------------
+* pictures screensaver
+
+/usr/share/applications/screensavers/personal-slideshow.desktop
+
+Scroll down to the line (near the end) that begins
+
+Exec=slideshow
+
+Add the following after this command:
+
+--location=/home/gsmendoza/pictures/national-geographic
+
+------------------------------------------------------------------------
+* list all your environment variables
+
+printenv
+
+------------------------------------------------------------------------
+* change password
+
+passwd agusev
+
+------------------------------------------------------------------------
+* add user
+
+sudo su root
+/usr/sbin/useradd suresh
+/usr/sbin/useradd agusev
+
+------------------------------------------------------------------------
+* find a command
+
+whereis command
+
+------------------------------------------------------------------------
+* add a sudo user
+
+sudo su root
+chmod 640 /etc/sudoers
+vi /etc/sudoers
+chmod 440 /etc/sudoers
+
+agusev ALL=(ALL) ALL
+
+then to test:
+
+su suresh
+sudo ls
+
+------------------------------------------------------------------------
+* make a file executable
+
+chmod +x rpm2cpio
+
+------------------------------------------------------------------------
+* list all usrs
+
+cat /etc/passwd | cut -d":" -f1 | sort
+
+------------------------------------------------------------------------
+set a partition as the home partition
+
+http://www.psychocats.net/ubuntu/separatehome
+
+gksudo gedit /etc/fstab
+/dev/sda3 /home ext3 nodev,nosuid 0 2
+
+
+------------------------------------------------------------------------
+add subtitles to avi
+
+mencoder -oac copy -ovc copy -sub "subtitles/Homicide - Life On The Street.S01E01.Gone For Goode.DVDRip.XviD-VF.srt" -subfont-text-scale 3 -o s01e01-gone-for-goode.avi "Homicide - S01E01 - Gone for Goode.avi"
+
+------------------------------------------------------------------------
+mp4 to mpeg
+
+ffmpeg -i The.Walking.Dead.S02E12.HDTV.x264-ASAP.[VTV].Better.Angels.mp4                                             -aspect 16:9 -target ntsc-vcd The.Walking.Dead.S02E12.HDTV.x264-ASAP.[VTV].Better.Angels.mpeg

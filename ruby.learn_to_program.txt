@@ -1,0 +1,237 @@
+Introduction
+  
+  A program is not built; it is grown.
+  Write programs with change in mind.
+  Don't Repeat Yourself
+  Make your programs flexible.
+  
+Chapter 1: Getting Started
+
+Chapter 2: Numbers
+
+Chapter 3: Strings
+
+  "pigs " * 5 -> pigs.*(5) -> pigs pigs pigs pigs pigs
+  5 * "pigs "  -> 5.*(pigs) # error and it should. Cause it doesn't make sense. 
+
+Chapter 4: Variables and Assignment
+
+  Copy and Paste is the opposite of DRY.
+  
+  Variables point only to values, they cannot point to other variables.
+  
+Chapter 5: Mixing it Up
+  
+  'Your momma did.'.to_f => 0
+  puts uses to_s to get the string version of that object
+  
+  gets - get string
+  chomp - removes enter character from string
+  
+  keep strings and integers in separate variables
+  
+Chapter 6: More about Methods
+
+  10 * 9 <=> 10.* 9
+  puts self => main # main is the object that puts
+  
+  capitalize capitalizes the first letter, and only the first letter 
+  
+  srand - seeds random number generator
+  
+  srand(0) - seeds it with really weird number
+  
+  :: -  Scope operator
+  
+Chapter 7: Flow Control
+
+  elsif
+  
+Chapter 8: Arrays and Iterators
+  [] - empty array
+  array index out of bounds will return nil
+  nil is a special object that means "not any other object"
+  
+  languages.each do |lang|
+    do something with lang
+  end
+  
+  iterators are always followed by do...end
+  
+  2.times do...end
+  
+  fruits.join(', ') => mango, guava, apple
+  
+Chapter 9: Writing Your Own Methods
+
+  # inner_var initially points to outer_var
+  # however, the first statement will set inner_var to the result of inner_var.reverse
+  # outer_var will remain unchanged 
+  def test inner_var
+    inner_var = inner_var.reverse
+    puts 'inner_var is ' + inner_var
+  end
+
+  # inner_var initially points to outer_var
+  # This time, inner_var.reverse! changes its value, which, incidentally, 
+  #   is the same value that it pointed to by outer_var
+  # outer_var is now changed 
+  def test inner_var 
+    inner_var.reverse!
+    puts 'inner_var is ' + inner_var
+  end
+
+  outer_var = 'hello'
+  test outer_var
+  puts 'outer_var is now ' + outer_var
+  
+  last evaluated expression is result of method
+  
+Chapter 10: There's Nothing New to Learn in Chapter 10
+
+Chapter 11: Reading and Writing, Saving and Loading, Yin and Something Else
+
+  ruby program.rb > file.txt
+  
+  File.open filename, 'w' do |f|
+    f.write string
+  end
+  
+  read_string = File.read filename
+  
+  YAML - represents objects as strings
+  
+  require 'yaml'
+  
+  test_string = test_array.to_yaml
+  read_array = YAML::load read_string
+  
+  Dir['*.{JPG,jpg}']
+  - case sensitive
+  - current working directory
+  
+  Dir['../*.{JPG,jpg}']
+  - parent directory
+  
+  Dir['**/*.{JPG,jpg}']
+  - current directory and all subdirectories
+  
+  Dir.chdir - changes current working directory
+  
+  moving a file == renaming a file
+  
+  print - puts without advancing to the next line
+  
+  c:/windows - use forward slashes instead of backslashes
+  
+  File.exist?
+  
+  exit
+  
+  playlist is a text file with an .m3u extension! Yun lang yun!
+
+Chapter 12: New Classes of Objects
+
+  Class is capitalized
+  
+  Time.new + 60 # one minute to the future
+  
+  Time.mktime(yyyy,mm,dd,HH,MM,SS)
+  
+  Time.new + 60 - Time.new ~= 60
+  Time.new + 60 > Time.new
+  
+  Time class thinks Time began at January 1, 1970, GMT, known as epoch
+  
+  January 1, 1970 == time 0
+  
+  You can't have times earlier than epoch!!!
+  
+  But there's Date and DateTime
+  
+  [] <==> Array.new
+  {} <==> Hash.new
+  
+  array.each do |value|
+    puts value
+  end
+  
+  hash.each do |key, value|
+    puts key + ': ' + value
+  end
+  
+  objects in hash not necessarily in same order put in
+  
+  letters = 'a'..'c'
+  
+  letters.to_a
+  
+  ('A'..'Z').each do |letter|
+    print letter
+  end
+  
+  range.min, .max, .include?
+  
+  (1970..1979).include?(1974.5) ==> true  
+  
+  string[4] ==> ascii code
+  
+  indexed from 0, of course
+  
+  string[4].chr
+  
+  ?T == 84 # ascii code of T
+  
+  string[index,length] ==> substring
+  string[start..end] ==> substring
+  - negative index starts from end of string
+  
+  def is_avi? filename
+    filename.downcase[-4,-1] == '.avi'
+  end
+  
+  Class.class
+
+Chapter 13: Creating New Classes, Changing Existing Ones
+
+  self is this
+  
+  def initialize
+  
+  def initialize name
+  
+  private
+
+Chapter 14: Blocks and Procs
+
+  block of code - between do and end
+  wrap it in an object called proc
+  
+  var = Proc.new |parameter| do ... end
+  
+  var.call
+  
+  You can pass procs into methods
+  And methods can return procs
+  
+  inspect
+  
+  lazy evaluation, infinite data structures, currying
+  
+  def method(&was_a_block_now_a_proc)
+    ...
+    was_a_block_now_a_proc.call
+    ...
+  end
+  
+  method do |object|
+    ...
+  end
+
+Chapter 15: Beyond This Fine Book
+
+ 
+
+
+
+

@@ -1,0 +1,69 @@
+SSH
+========================================================================
+
+Generate ssh keys
+------------------------------------------------------------------------
+
+ssh-keygen -t rsa -C "david.crowther@nervecentral.com"
+
+
+
+http://aperiodic.net/phil/ssh/
+--------------------------------------------------
+
+- public key
+  - encrypts stuff
+
+- private key
+  - decrypts stuff
+
+- public key authentication
+  - you encrypt a challenge with you public key
+  - If the other side successfully decrypts your
+    challenge, then they're authentic
+
+  - but how does this apply to server and client?
+
+- fingerprint
+  - when you receive a public key, you may not know
+    if it really belongs to the person you want to
+    talk to.
+
+- telnet
+  - simulates local access on a remote computer
+
+- ssh
+  - same as telnet in that it takes what you type and
+    sends it to the shell on the remote computer
+  - but it is encrypted
+
+- client sends password encrypted with server's public
+  key
+
+- client needs host key to verify host's authenticity
+  - cause host might be a "man in the middle"
+
+- in summary
+  - client ssh's to an account in the server
+  - server sends its public key to the client
+
+  - if the public key is not in the client's known hosts
+    - ssh asks client to check server's public key
+      fingerprint
+    - if ok, client adds server's public to known hosts
+
+  - if the public key is different from the one in the
+    client
+    - ssh stops communication
+
+  - if the public key is in the client's known hosts
+    - continue
+
+  - client encrypts it's public key with server's
+    public key and sends it to the server
+
+  - server decrypts client's public key with its own
+    private key
+
+  - if the client's public key is in the account's
+    authorized keys, then client has access to the account

@@ -1,0 +1,41 @@
+Rails 2.1 Time Zone Support: An Overview
+========================================================================
+
+- http://mad.ly/2008/04/09/rails-21-time-zone-support-an-overview/
+
+- config.time_zone = 'UTC'
+
+- database always stores date times in UTC
+
+- Rails will add 1 hour to the UTC offset if the time zone is in dst.
+
+- But what if you don't have the name of the time zone. You just have the offset? I DON'T THINK SO
+
+# Daylight savings time aware
+Time.parse("2008-04-06 15:30:00").in_time_zone("Central Time (US & Canada)") => Sun, 06 Apr 2008 02:30:00 CDT -05:00
+Time.parse("2008-01-06 15:30:00").in_time_zone("Central Time (US & Canada)") => Sun, 06 Jan 2008 01:30:00 CST -06:00
+
+# NOT Daylight savings time aware
+Time.parse("2008-04-06 15:30:00").in_time_zone(-6) => Sun, 06 Apr 2008 01:30:00 CST -06:00
+Time.parse("2008-01-06 15:30:00").in_time_zone(-6) => Sun, 06 Jan 2008 01:30:00 CST -06:00
+
+- If you need to create new time instances relative to Time.zone, use Time.zone.*
+
+- Time.now will return a time instance using the system's local time zone.
+
+- time.in_time_zone
+
+- What I like is something like this:
+
+>> time_zone = ActiveSupport::TimeZone["Central Time (US & Canada)"]
+=> #<ActiveSupport::TimeZone:0xb7013030 @utc_offset=-21600, @name="Central Time (US & Canada)", @tzinfo=#<TZInfo::DataTimezone: America/Chicago>>
+
+>> time_zone.parse("2008-04-06 15:30:00").utc  # => Sun Apr 06 20:30:00 UTC 2008 # has DST
+>> time_zone.parse("2008-01-06 15:30:00").utc  # => Sun Jan 06 21:30:00 UTC 2008 # No DST
+
+>>time_zone = ActiveSupport::TimeZone[-6]
+=> #<ActiveSupport::TimeZone:0xb7012ff4 @utc_offset=-21600, @name="Central America", @tzinfo=#<TZInfo::DataTimezone: America/Guatemala>>
+
+>> time_zone.parse("2008-04-06 15:30:00").utc  # => Sun Apr 06 21:30:00 UTC 2008 # No DST
+>> time_zone.parse("2008-01-06 15:30:00").utc  # => Sun Jan 06 21:30:00 UTC 2008 # No DST
+

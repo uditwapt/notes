@@ -1,0 +1,13 @@
+SVN
+========================================================================
+
+Get the users of an svn repository
+------------------------------------------------------------------------
+
+http://superuser.com/questions/130326/list-of-all-users-who-committed-to-a-svn-repository
+
+Check out the repo, then go to it and execute:
+
+    svn log | grep '^r[0-9]' | awk '{print $3}' | sort | uniq
+
+That gets a list of all the changes that have been commited, greps for the lines that start with the revision and number (r[12341] | author | date-and-stuff... ), prints out the third field (author), sorts the authors and gets rid of duplicates.

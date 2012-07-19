@@ -1,0 +1,101 @@
+* which version of centos?
+
+    cat /etc/redhat-release
+
+* install rpm2cpio
+
+  wget -c http://www.iagora.com/~espel/rpm2cpio
+  chmod +x rpm2cpio
+
+
+*
+
+  wget -c http://vault.centos.org/5.5/os/i386/CentOS/rpm-devel-4.4.2.3-18.el5.i386.rpm
+
+  rpm2cpio rpm-devel-4.4.2.3-18.el5.i386.rpm | cpio -dim
+
+* install rpm-libs
+
+  sudo su root
+
+  mkdir /tmp/install/rpm-libs && cd /tmp/install/rpm-libs
+  wget -c http://vault.centos.org/5.5/os/i386/CentOS/rpm-libs-4.4.2.3-18.el5.i386.rpm
+
+  rpm2cpio rpm-libs-4.4.2.3-18.el5.i386.rpm | cpio -dim
+  find . -type d -exec chmod 755 {} \;
+  tar cf - ./usr ./etc ./bin | (cd /; tar xvf -)
+
+
+  # rpm --rebuilddb
+  # rpm -i rpm-libs-4.4.2.3-18.el5.i386.rpm
+
+
+
+
+* install rpm
+
+  http://deadlockprocess.wordpress.com/2010/07/18/how-to-reinstall-rpm-and-yum-without-rpm-and-yum-in-centosrhel/
+
+  mkdir /tmp/install && cd /tmp/install
+  wget -c http://vault.centos.org/5.5/os/i386/CentOS/rpm-4.4.2.3-18.el5.i386.rpm
+
+  rpm2cpio rpm-4.4.2.3-18.el5.i386.rpm | cpio -dim
+  find . -type d -exec chmod 755 {} \;
+  tar cf - ./usr ./etc ./bin | (cd /; tar xvf -)
+  rpm --rebuilddb
+
+  # error: rpm: error while loading shared libraries: librpm-4.4.so: cannot open shared object file: No such file or directory
+
+  rpm -i rpm-4.4.2.3-18.el5.i386.rpm
+
+* install yum:
+
+  - http://www.sohailriaz.com/howto-install-yum-on-centos-52-vps/
+
+  - download the rpms
+
+    wget http://vault.centos.org/5.2/os/i386/CentOS/python-elementtree-1.2.6-5.i386.rpm
+    wget http://vault.centos.org/5.2/os/i386/CentOS/python-iniparse-0.2.3-4.el5.noarch.rpm
+    wget http://vault.centos.org/5.2/os/i386/CentOS/python-sqlite-1.1.7-1.2.1.i386.rpm
+    wget http://vault.centos.org/5.2/os/i386/CentOS/rpm-python-4.4.2-48.el5.i386.rpm
+    wget http://vault.centos.org/5.2/os/i386/CentOS/python-urlgrabber-3.1.0-2.noarch.rpm
+    wget http://vault.centos.org/5.2/os/i386/CentOS/yum-metadata-parser-1.1.2-2.el5.i386.rpm
+    wget http://vault.centos.org/5.2/os/i386/CentOS/m2crypto-0.16-6.el5.2.i386.rpm
+
+  -  install the rpms in the current order
+
+    sudo rpm -Uvh python-elementtree-1.2.6-5.i386.rpm
+    sudo rpm -Uvh python-sqlite-1.1.7-1.2.1.i386.rpm
+    sudo rpm -Uvh rpm-python-4.4.2-48.el5.i386.rpm
+    sudo rpm -Uvh python-urlgrabber-3.1.0-2.noarch.rpm
+    sudo rpm -Uvh yum-metadata-parser-1.1.2-2.el5.i386.rpm
+    sudo rpm -Uvh m2crypto-0.16-6.el5.2.i386.rpm
+    sudo rpm -Uvh python-iniparse-0.2.3-4.el5.noarch.rpm
+    sudo rpm -Uvh yum-3.2.8-9.el5.centos.1.noarch.rpm
+
+  - update yum
+
+    sudo yum -y update
+
+
+* install sqlite 3.6
+
+    # cd into my source tarball folder
+    cd /usr/src
+
+    # get the amalgation package
+    wget http://www.sqlite.org/sqlite-autoconf-3070500.tar.gz
+
+    # unpack it
+    tar xvzf sqlite-autoconf-3070500.tar.gz
+
+    # cd into the created folder
+    cd sqlite-autoconf-3070500
+
+    # run configuration
+    ./configure
+
+    # make and intall the package
+    make && sudo make install
+
+    sudo gem install sqlite3 --with-sqlite3-include=/usr/local/include --with-sqlite3-lib=/usr/local/lib

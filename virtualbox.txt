@@ -1,0 +1,4 @@
+Access localhost from virtual machine
+------------------------------------------------------------------------
+
+Need to get IP of ubuntu server

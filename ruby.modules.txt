@@ -1,0 +1,11 @@
+http://www.rubyfleebie.com/an-introduction-to-modules-part-1/
+
+* namespace
+
+* http://www.devarticles.com/c/a/Ruby-on-Rails/Ruby-Modules-Mixins-Fixins-and-Rails/
+
+require '<module>'
+
+http://pietschsoft.com/post/2008/11/02/Implementing-Namespaces-in-Ruby-using-Nested-Modules.aspx
+
+include '<module>' allows you to call the methods inside module directly

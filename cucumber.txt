@@ -1,0 +1,4 @@
+* remove unnecessary steps
+
+    cucumber --format usage features
+

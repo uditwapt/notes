@@ -1,0 +1,20 @@
+flv to mp3
+
+sudo apt-get install ecasound mpg123 lame ffmpeg
+Restart your computer for ecasound to work correctly.
+
+Code:
+ffmpeg -i *.flv -f mp3 -vn -acodec copy /tmp/temp.mp3
+ecasound -i /tmp/temp.mp3 -etf:8 -o ~/mysong.mp3
+rm -f /tmp/temp.mp3
+ffmpeg -i /path/to/video.flv /path/to/song.mp3
+
+yea, but that way you lose a lot of the quality (the sound is encoded then in 64kbits)
+
+Code:
+ffmpeg -i /path/to/video.flv -ac 2 -ar 44100 -ab 320 /path/to/audio.mp3
+probably that is not the best way to do it (as im not using the '-acodec codec), but i managed to get quite good quality with this.
+-ac is number of audio channels
+-ar is samplerate
+-ab is bitrate
+
