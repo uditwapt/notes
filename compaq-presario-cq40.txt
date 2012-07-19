@@ -1,4 +1,9 @@
 ------------------------------------------------------------------------
+2012-07-19: git-meld does not display new files in working directory
+
+Why? Ignore Symbolic Links is turned on.
+
+------------------------------------------------------------------------
 2012-06-07: baweb test and cucumber apps cannot connect to /var/tmp/mysql/mysqld.sock
 
 Why? In-memory mysql database might not be set up correctly.
