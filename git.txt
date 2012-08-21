@@ -1,16 +1,21 @@
 Git
 ========================================================================
 
-Trace a failing git alias
--------------------------------------------------------------
+edit commit messages
+------------------------------------------------------------------------
 
-Problem: you're getting the error: "fatal: cannot exec '...': Permission denied"
+git rebase --interactive $parent_of_flawed_commit
 
-strace can help finding the entry that is returning EACCES, as in: strace -f -e execve git foobar
 
 find commits with ticket number
 ------------------------------------------------------------------------
 git log --oneline --grep=#728
+
+
+Import an svn repository
+------------------------------------------------------------------------
+
+svn2git http://nerveman@svn.assembla.com/svn/unico --exclude vendor/rails --exclude vendor/gems
 
 
 push a tag
@@ -19,9 +24,25 @@ push a tag
 git tag -a <name>
 git push origin tag <name>
 
+
+Rebase remote branch
+------------------------------------------------------------------------
+
+git push origin feature -f
+
+
 restore deleted file
 ------------------------------------------------------------------------
 git checkout HEAD^ file
+
+
+Trace a failing git alias
+-------------------------------------------------------------
+
+Problem: you're getting the error: "fatal: cannot exec '...': Permission denied"
+
+strace can help finding the entry that is returning EACCES, as in: strace -f -e execve git foobar
+
 
 uncommit
 ------------------------------------------------------------------------
@@ -31,21 +52,6 @@ leave changes intact, but bump down the revision
 git reset HEAD^
 
 http://twigstechtips.blogspot.com/2009/10/git-uncommit-revision-but-keep-changes.html
-
-reset
-------------------------------------------------------------------------
-
-
-edit commit messages
-------------------------------------------------------------------------
-
-git rebase --interactive $parent_of_flawed_commit
-
-
-Import an svn repository
-------------------------------------------------------------------------
-
-svn2git http://nerveman@svn.assembla.com/svn/unico --exclude vendor/rails --exclude vendor/gems
 
 
 gitimmersion.com
