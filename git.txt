@@ -12,6 +12,15 @@ find commits with ticket number
 git log --oneline --grep=#728
 
 
+Ignore changes to tracked files
+------------------------------------------------------------------------
+
+http://archive.robwilkerson.org/2010/03/02/git-tip-ignore-changes-to-tracked-files/
+
+To ignore: git update-index --assume-unchanged path/to/database.yml
+To unignore: git update-index --no-assume-unchanged <file>
+Find files marked assumed-unchanged: git ls-files -v | grep -e "^[hsmrck]"
+
 Import an svn repository
 ------------------------------------------------------------------------
 
