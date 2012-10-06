@@ -1,4 +1,22 @@
 ------------------------------------------------------------------------
+2012-09-29: cannot load such file -- readline
+
+See: http://stackoverflow.com/questions/5487507/rails3-and-readline-problem
+
+Solution: add rb-readline to Gemfile.
+
+------------------------------------------------------------------------
+2012-09-29: Couldn't install pg gem with ruby 1.9.2
+
+See: http://stackoverflow.com/questions/9593366/gem-install-pg-mysterious-error-extconf-rb-related
+
+Solution:
+
+- Install postgresql.
+- Install postgresql-server-dev-9.1.
+- Update ruby in rvm to 1.9.2.
+
+------------------------------------------------------------------------
 2012-07-19: git-meld does not display new files in working directory
 
 Why? Ignore Symbolic Links is turned on.
