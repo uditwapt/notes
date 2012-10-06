@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------
+* command history
+
+Search the history using Control+R
+
+http://www.thegeekstuff.com/2008/08/15-examples-to-master-linux-command-line-history/
+
+------------------------------------------------------------------------
 * tar zip
 
 tar cvzf unicorn_preview.sql.tar.gz db/unicorn_preview.sql
