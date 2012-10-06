@@ -1,0 +1,68 @@
+The ems have it: proportional media queries ftw!
+========================================================================
+
+* http://blog.cloudfour.com/the-ems-have-it-proportional-media-queries-ftw/
+
+If we're going to be proportional
+---------------------------------
+
+* responsive web design tenets
+  - fluidity and proportion
+  - percentages in css
+  - font units in percentages (top level baseline reset)
+  - font units more often in ems
+
+* however, we still use pixels for media queries
+  - natural thought process
+
+* What if we look at things from a content perspective?
+  - design based on optimal line length instead of width of containers
+  - "right" number of letters per line
+
+* actual column width
+  - based on font size and ems per line
+
+Baseline expectations
+---------------------
+
+* baseline font sizes in css:
+  - 100% == 1 em ~= 16px ~= 14pt
+
+* Is there a difference between?
+  - min-width: 400px
+  - min-width: 25em
+
+The answer, my friend, is content
+----------------------------------
+
+* Pixel defined content holders don't adjust well to zooms
+  - do not have comfortable amounts of words per line
+  - doesn't seem to be the base with boutiqueair though...
+
+Case study: our nav
+-------------------
+
+* min-width: 656px
+  - creates awkwardly wrapped nav elements
+
+* min-width: 41em
+  - scales to the larger text size
+
+The specifics of em-based media queries
+---------------------------------------
+
+A device-specific aside
+-----------------------
+
+* problem: kindle's browser text zoom is high
+  - due to high pixel density
+  - absolute-sized font is tiny
+  - browser works around this by zooming
+
+
+http://filamentgroup.com/lab/how_we_learned_to_leave_body_font_size_alone/
+========================================================================
+
+
+
+
