@@ -1,0 +1,27 @@
+
+Rails 3.2.7 SSL Localhost (no red warnings, no apache config)
+------------------------------------------------------------------------
+
+* https://gist.github.com/trcarden/3295935
+* http://www.railway.at/2013/02/12/using-ssl-in-your-local-rails-environment/
+
+1. openssl req -new -newkey rsa:2048 -sha1 -days 365 -nodes -x509 -keyout ~/.ssh/localhost.key -out ~/.ssh/localhost.crt
+  - what this does:
+    1. create a DES3 encrypted key with a password.
+    2. remove the DES3 encryption from the key
+    3. create a Signing request to no one.
+      - details are important!
+        - common name: localhost.ssl
+          - keeps browsers happy
+    4. sign that thing!
+
+2. echo "127.0.0.1 localhost.ssl" | sudo tee -a /etc/hosts
+  - add localhost.ssl to your hosts file
+
+3. thin start --ssl --ssl-verify --ssl-key-file server.key --ssl-cert-file server.crt
+  - two thin servers: one for http and another for https
+
+    - thin start -p 3000
+    - thin start -p 3001 --ssl --ssl-verify --ssl-key-file ~/.ssh/localhost.key --ssl-cert-file ~/.ssh/localhost.crt
+
+

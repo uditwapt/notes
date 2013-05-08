@@ -1,0 +1,525 @@
+http://spinejs.com/docs/classes
+========================================================================
+
+* Spine uses classical classes.
+
+* Javascript doesn't have classical classes.
+
+Implementation
+------------------------------------------------------------------------
+
+* Spine uses CoffeeScripts' native class implementation.
+
+* OO keywords used by CS: new, extends, super
+
+Contexts
+------------------------------------------------------------------------
+
+* => 
+  - fat arrow functions
+  - retains context
+
+* example
+  - 
+    class TaskApp extends Spine.Controller
+      constructor: ->
+        super
+        Task.bind("create",  this.addOne)
+        Task.bind("refresh", this.addAll)
+        Task.fetch()
+
+      addOne: (task) =>
+        view = new Tasks(item: task)
+        this.append(view.render())
+
+      addAll: =>
+        Task.each(this.addOne)
+        
+  - When Task raises a create event, do this.addOne with the task.
+      
+  - this.AddOne has a task argument.
+
+  - this.AddOne creates a Tasks view containing the task. It then renders the view
+    and lets TaskApp append the view.
+    
+  - this.AddAll calls this.AddOne on each task. So Task.each passes each task to
+    this.addOne.
+  
+  - The controller is a set of callbacks tying the model events to view 
+    changes.
+    
+  - You can substitute addOne like this:
+  
+    Task.bind "create", (task) =>
+      view = new Tasks(item: task)
+      this.append(view.render())
+
+    - "this" will be controller, which is why addOne uses the fat arrow.
+    - If I used the thin arrow, this.append will be in the context of... NOT SURE
+      - The doc says Task, but how does that happen???
+      
+Modules
+------------------------------------------------------------------------
+
+* Spine.Module adds this.extend and this.include to your class.
+
+* All Spine classes are based on Spine.Module
+
+* Modules also have callback functions, this.extended and this.included, which
+  are called... NOT SURE WHEN
+  - when the module is extended/included somewhere else?
+  - when other modules are extended/included to the module?
+  
+JavaScript classes
+------------------------------------------------------------------------
+
+* If you're writing JS code with Spine.js, use Spine.Class.
+
+* Spine.Class.sub() subclasses Spine.Class.
+
+* Users.extend() and Users.include work as expected.
+
+* Users.sub() will inherit sub.
+
+* init for class initialization.
+
+* super is more convoluted: this.constructor.__super__.init.apply(this, arguments)
+
+
+http://spinejs.com/docs/models
+========================================================================
+
+* client side data management
+  - no request/response model
+  - data is fetched remotely and store temporarily on the client side.
+  
+* models store data and logic
+
+* models can be persisted with html5 data storage or ajax
+
+
+Implementation
+------------------------------------------------------------------------
+
+* Extend Spine.Model
+
+* this.configure "Name", "attribute", "attribute"
+
+* You can add class and instance methods to a Model:
+  -
+    this.class_method: ->
+    instance_method: ->
+    
+* this.extend and this.include work as expected
+
+* new accepts hash of attributes
+
+* models can be subclassed
+
+
+Saving/retrieving records
+------------------------------------------------------------------------
+
+* Call model.save to save the model in memory
+
+* Spine automatically creates an id for a model
+
+* Model.find(id) throws error if id does not exist.
+
+* Use Model#exists
+
+* Model#save updates existing record.
+
+* Model.first, .last, .all
+
+* Contact.each (contact) -> console.log(contact.first_name) is 
+  Contact.each((contact) -> console.log(contact.first_name)), that is,
+  contact is an argument of the anonymous function.
+  
+* Contact.select
+
+
+Validation
+------------------------------------------------------------------------
+
+* Override Model#validate
+
+* if validate() returns anything, an error event will be raised on the model.
+
+* Example:
+
+  -
+    Contact.bind "error", (rec, msg) ->
+      alert("Contact failed to save - " + msg)
+      
+  - When Contact raises an error event, do alert.
+  
+* save, create, and updateAttributes return false if the validation fails
+
+* I wonder how to do attribute based validations.
+
+Serialization
+------------------------------------------------------------------------
+
+* JSON.stringify(Contact) - serializes every Contact
+
+* this.attributes are where your attributes are at.
+
+
+Persistence
+------------------------------------------------------------------------
+
+* Saving in memory is NOT persistence (I thought it was hehe)
+
+
+Events
+------------------------------------------------------------------------
+
+* save, update, create, destroy, change, refresh, error
+
+* refresh - ALL records invalidated and replaced???
+
+* You can bind to the event directly on the record:
+  -
+    contact = Contact.first()
+    contact.bind "save", -> 
+      # Contact was updated
+      updateInterface()  
+      
+  - Who owns updateInterface? The "record that the event listener was
+    placed on"?
+    
+  - a "model event". An instance level event? 
+  
+  - Crucial in binding records to the view.
+  
+* Model#unbind
+
+
+Dynamic records
+------------------------------------------------------------------------
+
+* Models use prototypal inheritance. If a record is updated, all of its
+  instances (clones) are updated.
+  
+* No need for some reload function
+
+
+Relationships
+------------------------------------------------------------------------
+
+* Supports has-many, has-one, belongs-to relationships
+* See http://spinejs.com/docs/relations
+
+
+http://spinejs.com/docs/controllers
+========================================================================
+
+* Set of conventions instead of actual code. 
+  - adding, responding to dom events
+  - rendering templates
+  - keeping models and views in sync
+  
+
+Implementation
+------------------------------------------------------------------------
+
+* Spine.Controller
+
+* Convention: plural name of model associated with controller
+
+* Controller is associated with an element el. 
+  - tag property defines type of el. Default is div.
+  
+* Why is TaskItem in the example not plural???
+
+* el can be set manually through instantiation
+  - Where do we instantiate???
+
+* Items passed through instantiation become properties of the controller.
+
+
+Events
+------------------------------------------------------------------------
+
+- Example
+
+  class Tasks extends Spine.Controller
+    events: 
+      "click .item": "click"
+
+    click: (event) ->
+      # Invoked when .item is clicked
+
+- {"eventType selector": "functionName"}
+  - selectors are scoped by el
+  - no selector == el
+  
+- Spine keeps the context to the controller.
+  - event object 
+  - event.target
+  
+- Spine uses delegation for events.
+  - no need to reinitialize events when contents of el changes.
+  
+- Example
+  -
+    class ToggleView extends Spine.Controller
+      constructor: ->
+        super
+        this.items = this.$(".items")
+        this.items.click => this.trigger("toggle")
+        this.bind "toggle", this.toggle
+
+      toggle: ->
+        # ...  
+  
+  - this.items = this.$(".items")
+    - this.$(".items") == this.el.find(".items"), I think
+  
+  - ToggleView ???
+
+Elements
+------------------------------------------------------------------------
+
+- Example
+  -
+    class Tasks extends Spine.Controller
+      elements:
+        ".items": "items"
+
+
+http://spinejs.com/docs/views        
+========================================================================
+
+* View - html fragment
+
+* All the view rendering is done on the client side
+  - What if the view structure doesn't change much???
+  
+* Eco - CoffeeScript templates
+
+
+Eco templates
+------------------------------------------------------------------------
+
+* <% if this.projects.length: %>
+  - What does the colon do???
+  
+* <%= escapes return value, <%- does not escape
+
+* <%= this.property
+  - this.property is property of context
+  
+* <% helper -> %> ... <% end %>
+  - function argument will capture and return content inside tag???
+  
+
+Compiling templates, Data Associations
+------------------------------------------------------------------------
+
+* Can't follow much
+
+
+Template helpers
+------------------------------------------------------------------------
+
+* Example
+  -
+    class Currencies extends Spine.Controller
+      render: ->
+        this.output = this.input and (this.input * this.rate()).toFixed(2) or 0
+        this.html require('views/currency')(this.)
+
+        helper:
+          format: (num) ->
+            num.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",")  
+
+  - Where did render come from??? Is it always required???
+  - this.html()
+  - require('views/currency') returns a function that will read this..
+  
+* helper
+  - must be inside render method
+  
+
+Binding
+------------------------------------------------------------------------
+
+* 
+  
+  
+http://spinejs.com/docs/example_tasks
+========================================================================
+
+
+Index
+------------------------------------------------------------------------
+
+* requirements
+  - JSON2, jQuery, jQuery.tmpl, Spine
+  
+
+Application HTML
+------------------------------------------------------------------------
+    
+* Need
+  - form for task
+  - %div.items for listing tasks
+  - footer
+    - some operations such as clearing tasks
+    - showing stats
+    
+
+Task model
+------------------------------------------------------------------------
+
+* model
+  - attributes: name, done
+  
+  
+* Task.extend(Spine.Model.Local);
+  - stores data in the browser
+  - 5MB max per domain
+  - offline apps
+  
+* methods
+  Task.active, .done, .clearDone
+  
+
+ApplicationController
+------------------------------------------------------------------------
+
+* Uses element controller pattern. Two controllers
+  - TaskApp
+    - creates new tasks, rendering initial task list
+    - I'll probably name this AppController
+    
+  - Tasks
+    - controller per task
+    - I'll probably name this TaskController
+    
+* Start with Read only app:
+  - 
+    class TaskApp extends Spine.Controller
+      elements:
+        ".items": "items"
+
+      constructor: ->
+        super
+        Task.bind("create",  this.addOne)
+        Task.bind("refresh", this.addAll)
+        Task.fetch()
+
+      addOne: (task) =>
+        view = new Tasks(item: task)
+        this.items.append(view.render().el)
+
+      addAll: =>
+        Task.each(this.addOne)  
+        
+    - addOne creates a Tasks Controller for the task and renders that
+      controller. The element which is the result of the render (view)
+      is appended to the items elements.
+      
+    - Task.fetch gets the data from local storage, triggering Task.refresh 
+      and Task#create for each task.
+      
+
+Tasks controller
+------------------------------------------------------------------------
+
+- Code
+  - 
+    class Tasks extends Spine.Controller
+      constructor: ->
+        super
+        this.item.bind("update",  this.render)
+        this.item.bind("destroy", this.remove)
+
+      render: =>
+        this.replace $("#taskTemplate").tmpl(this.item)
+        this.
+
+      remove: =>
+        this.el.remove()  
+        
+  - Tasks receives an this.item, binds this.render and this.remove to the item's methods
+  - render replaces the element of the controller with the #taskTemplate
+    containing the item.
+    - returns the controller
+    
+  - $("#taskTemplate").tmpl(this.item) should return a string, I think
+    
+  - this.remove remove the this.el
+    - Why does this.remove access this.el directly while render does not???
+    
+  
+Template
+------------------------------------------------------------------------
+
+* template is included in the page as a custom script tag
+  - 
+    <script type="text/x-jquery-tmpl" id="taskTemplate">
+      <div class="item {{if done}}done{{/if}}">
+        <div class="view" title="Double click to edit...">
+          <input type="checkbox" {{if done}}checked="checked"{{/if}}> 
+          <span>${name}</span> <a class="destroy"></a>
+        </div>
+      </div>
+    </script>  
+
+
+Setup
+------------------------------------------------------------------------
+
+* Controller can be initialized within jQuery just fine:
+  -
+    jQuery ($) ->
+      new TaskApp(el: $("#tasks"))
+      
+
+Creating new tasks
+------------------------------------------------------------------------
+
+* create and clear methods:
+  -
+    class TaskApp extends Spine.Controller
+    
+      elements:
+        ".items":     "items"
+        "form input": "input"    
+
+      create: (e) ->
+          e.preventDefault()
+          Task.create(name: this.input.val())
+          this.input.val("")
+
+      clear: ->
+        Task.destroyDone()
+      
+      
+  - this.input belongs to TaskApp
+  - this.create used -> although I think => is also ok.
+  
+
+Completing & deleting tasks
+------------------------------------------------------------------------
+
+* Code
+  - 
+    class Tasks extends Spine.Controller  
+      toggle: ->
+        this.item.done = !this.item.done
+        this.item.save()
+
+      destroyItem: ->
+        this.item.destroy()  
+        
+  - woudl this.el have been problematic???
+
+
+
+
+    
+

@@ -1,0 +1,165 @@
+2012-12-17:
+--------------------------------------------------------------------------------
+
+Problem: ERROR: rvm requires autoreconf
+
+Reference: http://www.linuxguy.in/error-rvm-requires-autoreconf/
+
+Solution: install automake
+
+
+
+2012-12-17:
+--------------------------------------------------------------------------------
+
+Problem: un-optimized ruby
+
+baweb$ time rake environment
+[DEPRECATION WARNING] Nested I18n namespace lookup under "activerecord.attributes.air/reservation" is no longer supported
+
+real	0m50.475s
+user	0m35.014s
+sys	0m1.948s
+
+---
+
+http://spin.atomicobject.com/2012/11/06/is-your-application-running-with-ruby-slow/
+
+ruby -rrbconfig -e 'puts RbConfig::CONFIG["CFLAGS"]'
+
+---
+
+http://alisnic.net/blog/making-your-ruby-fly/
+
+~/.rvmrc
+  rvm_configure_env=(CFLAGS="-march=native -O2") 
+  
+rvm upgrade 1.9.3 1.9.3-turbo --patch falcon
+
+---
+
+baweb$ which ruby
+/home/gsmendoza/.rvm/rubies/ruby-1.9.3-p327-turbo/bin/ruby
+
+baweb$ ruby -rrbconfig -e 'puts RbConfig::CONFIG["CFLAGS"]'
+-march=native -O2 -fPIC
+
+baweb$ time rake environment
+[DEPRECATION WARNING] Nested I18n namespace lookup under "activerecord.attributes.air/reservation" is no longer supported
+
+real	0m39.896s
+user	0m27.606s
+sys	0m1.604s
+
+----
+
+baweb$ ruby -rrbconfig -e 'puts RbConfig::CONFIG["CFLAGS"]'
+-march=core2 -O2 -fomit-frame-pointer -pipe -fPIC
+
+baweb$ time bundle exec rake environment
+[DEPRECATION WARNING] Nested I18n namespace lookup under "activerecord.attributes.air/reservation" is no longer supported
+
+real	0m12.318s
+user	0m10.469s
+sys	0m0.948s
+
+
+
+
+
+2012-11-26:
+--------------------------------------------------------------------------------
+
+Problem: rotate baweb/log's log files.
+Solution: http://stackoverflow.com/questions/4883891/ruby-on-rails-production-log-rotation
+
+/etc/logrotate.d/baweb
+
+/home/gsmendoza/workspace/boutique-air/baweb/log/*.log {
+    daily
+    missingok
+    rotate 52
+    notifempty
+    copytruncate
+}
+
+2012-11-26:
+--------------------------------------------------------------------------------
+
+Problem: In Geany, bold and normal font do not align.
+
+Solution: Use Dejavu Sans Mono Book
+
+2012-11-25:
+--------------------------------------------------------------------------------
+
+Bookworm: 6YXVZ-L7RD7-RRNAK-9ATN4
+
+2012-11-14: 
+--------------------------------------------------------------------------------
+
+* Problem: cap seems to ignore ForwardAgent settings in ~/.ssh/config
+
+* Solution: export GATEWAY='gsmendoza@fire.boutiqueair.com'. 
+  This will tell capistrano to use gsmendoza as user. As I can see from 
+  the output you provided capistrano asks you password while trying to 
+  connect to the gateway.
+  
+  You can set this at ~/.pam_enviroment. See http://askubuntu.com/questions/4667/where-to-declare-environment-variables.
+  
+  This worked:
+
+    GATEWAY DEFAULT="gsmendoza@fire.boutiqueair.com"
+
+2012-11-14: https://help.github.com/articles/using-ssh-agent-forwarding
+--------------------------------------------------------------------------------
+
+* Problem: fire.boutiqueair.com asks me for a password when I log in to proto.
+  - applies to cap as well.
+  
+* Indications:
+  - ssh -A fire.boutiqueair.com forwards authentication.
+  - ssh-add doesn't seem to have any effect.
+  
+* Solution: set ForwardAgent Yes to fire.boutiqueair.com in ~/.ssh/config
+
+
+2012-11-09: http://askubuntu.com/questions/134/how-do-i-create-a-desktop-wallpaper-slideshow
+--------------------------------------------------------------------------------
+
+Solution: http://encore254.blogspot.com/2012/08/change-ubuntu-1204-slideshow-desktop.html
+
+2012-11-09: Slideshow Screensaver
+--------------------------------------------------------------------------------
+
+* http://www.howtogeek.com/114027/how-to-add-screensavers-to-ubuntu-12.04
+
+* Problem: Xscreensaver GLSLideshow Does Not See My Images
+  Solution: install libwww-perl
+  Source: http://ubuntuforums.org/showthread.php?t=1979116
+
+* Problem: Does not start up
+  Solution: Add xscreensaver -nosplash as startup program
+  Source: http://www.howtogeek.com/114027/how-to-add-screensavers-to-ubuntu-12.04
+  
+* Problem: gnome-screensaver gets called when locking screen
+  Solution: Update keyboard bindings
+  Source: http://www.howtogeek.com/114027/how-to-add-screensavers-to-ubuntu-12.04
+
+2012-11-01: gnome terminal is not picking up rvm?
+--------------------------------------------------------------------------------
+
+https://rvm.io/integration/gnome-terminal
+
+
+2012-11-01
+--------------------------------------------------------------------------------
+
+* Install Ubuntu 12.04 LTS
+
+* Update bash prompt
+  - update .bash_profile instead of .bash_rc
+
+* Set up public key for git
+  - https://help.github.com/articles/generating-ssh-keys
+

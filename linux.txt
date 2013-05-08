@@ -1,9 +1,28 @@
 ------------------------------------------------------------------------
+* Benchmark a script
+
+time bundle exec rspec --drb spec/lib/rloc_spec.rb
+
+------------------------------------------------------------------------
 * command history
 
 Search the history using Control+R
 
 http://www.thegeekstuff.com/2008/08/15-examples-to-master-linux-command-line-history/
+
+------------------------------------------------------------------------
+* How do I rotate log files
+
+http://www.cyberciti.biz/faq/how-do-i-rotate-log-files/
+
+------------------------------------------------------------------------
+* Where to declare environment variables?
+
+http://askubuntu.com/questions/4667/where-to-declare-environment-variables
+
+For local or per-user settings
+
+A previous version of the Ubuntu page recommended ~/.pam_environment
 
 ------------------------------------------------------------------------
 * tar zip
@@ -51,6 +70,21 @@ tar cvzf unicorn_preview.sql.tar.gz db/unicorn_preview.sql
 * copy a file from a remote server
 
  scp dev_deployer@flightboard.com:/home/dev_deployer/dev.boutiqueair.com/current/app/views/air/content/faq.html.erb faq.html.erb
+
+------------------------------------------------------------------------
+* grep a file, but show several surrounding lines?
+
+  For BSD or GNU grep you can use -B num to set how many lines before the match and -A num for the number of lines after the match.
+
+  grep -B 3 -A 2 foo README.txt
+
+  If you want the same amount of lines before and after you can use -C num.
+
+  grep -C 3 foo README.txt
+
+  This will show 3 lines before and 3 lines after.
+
+  http://stackoverflow.com/questions/9081/grep-a-file-but-show-several-surrounding-lines
 
 ------------------------------------------------------------------------
 * passwordless ssh
@@ -184,3 +218,8 @@ mencoder -oac copy -ovc copy -sub "subtitles/Homicide - Life On The Street.S01E0
 mp4 to mpeg
 
 ffmpeg -i The.Walking.Dead.S02E12.HDTV.x264-ASAP.[VTV].Better.Angels.mp4                                             -aspect 16:9 -target ntsc-vcd The.Walking.Dead.S02E12.HDTV.x264-ASAP.[VTV].Better.Angels.mpeg
+
+------------------------------------------------------------------------
+copy website
+
+wget --mirror -p --convert-links -P ~/websites http://emotioneric.com/

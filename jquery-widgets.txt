@@ -15,7 +15,8 @@ Modifying Elements: Plugins
 
 * plugin syntax
 
-  $.fn.green = function(){ return this.css() /* a jquery element */ }
+  $.fn.green = function(){ return this.css(background: 'green') /* a jquery element */ } // define
+  $('.target').green(); // invoke
 
 * What's missing
   - No way to keep plugin associated with element, so we can do something
@@ -65,7 +66,7 @@ The problems with associating an object with a plugin
     this.green = new Green($this) // links js object to dom element
     this.target = target // links dom element to js object
 
-  - causes memory leaks in browsers because they're usually different
+  - causes memory leaks in browsers because there are usually different
     garbage collectors for dom and js objects.
 
 * Possible solution for circular reference. Use $.fn.data.
@@ -123,7 +124,6 @@ Manipulating widgets
 * jquery determines if a function is a setter or getter depending on its return value.
 
 * passing arguments: $('.target').green3('setLevel', 5);
-
 
 Data for each widget
 ------------------------------------------------------------------------
