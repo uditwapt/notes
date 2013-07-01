@@ -1,0 +1,62 @@
+Animation in a Flashless world
+================================================================================
+
+http://24ways.org/2012/flashless-animation/
+file:///home/gsmendoza/Documents/24%20ways%20%20Flashless%20Animation.html
+
+The walk cycle
+--------------
+
+- in-between frames
+  - tween frames
+
+- can set frames per second rate in css3?
+
+- code
+
+  .tuna {
+    /* steps causes the animation to chunk into 12 equal pieces */
+    animation: walk-cycle 1s steps(12) infinite;
+    background: url(http://stash.rachelnabors.com/img/codepen/tuna_sprite.png) 0 0 no-repeat;
+    height: 200px;
+    width: 400px;
+    margin: 100px auto 0;
+  }
+
+  @keyframes walk-cycle {
+    0% {background-position: 0 0; }
+    100% {background-position: 0 -2391px; } /* Must be full height of sprite or skipping will happen.*/
+  }
+
+  p {text-align: center;}
+
+
+  - walk-cyle is the name of the @keyframes
+  - tuna sprite.png? So we need a sprite for head, mouse and eyes?
+    - sprite must have transparent background
+
+  - @keyframes block
+    - -2391px - negative height for background position?
+
+  - steps()
+    - timing function
+    - don't scroll, jump instead
+    - there's also steps(i, start) and steps(i, end)
+      - I think it's like ++c and c++
+
+
+The background
+--------------
+
+- code
+
+  background-image:
+    url(background_mountain5.png),
+    url(background_mountain4.png),
+    url(background_mountain3.png),
+    url(background_mountain2.png),
+    url(background_mountain1.png);
+
+  background-repeat: repeat-x;
+
+  - you can have multiple background images? cool!

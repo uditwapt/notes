@@ -1,0 +1,171 @@
+http://www.infoq.com/presentations/integration-tests-scam
+================================================================================
+
+- values
+  - throw-away
+  - lightweight
+  - immutable?
+
+- entity
+  - has an id
+  - stored somewhere
+
+- service
+  - stateless action
+
+- We don't want to test multiple entities and services at the same time
+
+- long running tests
+  - slow feedback
+    - cost of change versus cost of mistake
+    - how long between we make the problem versus we find the problem = cost of mistake
+
+  - no feedback
+    - we run subsets of the tests
+      - makes it hard to find subtle costly mistakes
+        - driving down costs of mistakes that are easy to find
+        - driving up costs of mistakes that are hard to find
+      - false security
+        - screwing up and thinking you're doing well
+
+- test as change detectors
+
+- value of having tests as having no tests at all
+
+- what about small clusters of objects?
+  - excessive test setup
+    - leads to multiple assertions
+
+
+  - arrange, act, assert
+
+  - one assertion per test is going to teach you how to write good tests
+
+  - one action per test
+
+  - asssumptions from test setup
+
+- review
+  - integration test fails, you don't know where the failure is.
+  - integration tests are slower than focused object tests
+  - fall sense of security
+
+- how many tests do you need?
+  - product of code paths
+  - we'll never write that many tests
+  - 80/20 rule
+  - but you don't know if you are near to 80 and 20 percent
+  - number of support calls
+  - writing more tests is not going to make anything better.
+  - more tests
+
+- mock objects
+  - growing object oriented systems with tests
+
+- one objection
+  - passing the buck?
+
+- not customer tests
+  - not feature tests
+  - feature tests
+    - not exhaustive
+    - key business value
+  - programmer tests
+    - testing assumptions
+
+- basic correctness
+  - myth of perfect technology
+    - no need to worry about memory limits and computing time
+      - nonfunctional requirements
+  - do we compute the right answer?
+
+- thesis: you should never need to write an integration test to show basic correctness
+  - write only focused object test
+
+- 5000 tests in ten seconds
+
+- don't test the platform
+
+- collaborators
+
+- interfaces
+
+- object talks to itself correctly
+
+- don't talk to the production implementation of the collaborator
+
+- no interface on value
+
+- question
+  - Do the client ask the interface the right questions?
+  - Will the client be able to handle the right response?
+
+- test doubles
+  - implementation of interface
+  - client can't make the difference
+
+- client - interface - server
+
+- repository is an interface for getting/setting data
+
+- collection is response
+  - three responses: 0, 1, many, lots (has pages)
+
+- stub versus mock
+  - stub - no expectation to be invoked
+
+- interaction tests
+  - collaboration test
+  - testing conversation
+
+- why do still rely on integration tests even with collaboration tests?
+  - only done half the work
+
+- side of supplier/server
+  - does the server handle the request the client makes?
+  - does the server return the response the client expects?
+
+- contract tests
+
+- list example
+  - array list, linked list
+    - TestContract test
+
+- state-based for communicating to platform
+
+- limiting ourself to basic correctness, you can 100% confidence in basic correctness
+
+- instead of 3 x 4 x ..., you have 3 + 4 + ...
+
+- one bit of essential complexity
+  - how to ensure there's a matching contract test for each interface?
+
+- what about the rest (outside of basic correctness)?
+  - after getting basic correctness done, programmers will have more time for the hard stuff (security, performance, etc..)
+
+- integration test for finding errors
+  - once found, covered to focused object test
+
+- inappropriate layering issues
+  - mock has a mock which has another mock
+
+- when collaboration and contract tests are hard to write, you see where the design issues are.
+
+- two principles
+  - remove duplication
+  - fix bad names
+
+- customer tests
+  - use them only for clarifying requirements
+
+- domain driven design
+  - no interface on front of value
+  - interface in front of service
+  - if interface in front of entity, there's probably an entity in front of that entity.
+    - usually entity responsible for its persistence
+      - hello it's 2009 :P
+
+- tests are the second client
+
+-
+

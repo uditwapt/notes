@@ -1,0 +1,248 @@
+http://rubysource.com/ddd-for-rails-developers-part-1-layered-architecture/
+================================================================================
+
+What is ddd?
+------------
+
+- The complex domain is what you tack when developing enterprise application.
+- Business processes are far from trivial.
+
+The book
+--------
+
+- Eric Evans - domain driven design
+
+DDD and Rails
+-------------
+
+- DDD and Rails contradict each other.
+- How to introduce DDD concepts to an existing application
+
+Layered architecture
+--------------------
+
+- Partition an applicaiton into layers:
+  - user interface
+  - application layer
+    - thin
+    - no domain logic
+    - functionality for business but not domain specific
+    - reports, sending email notifications, etc
+
+  - domain layer
+    - business processes
+    - abstract domain concepts
+      - entities and business rules
+
+  - infrastructure layer
+    - persistence, messaging, email delivery, etc.
+
+- every layer should depend only on layers beneath it.
+  - only on the layer directly beneath it?
+
+Layered architecture and Rails
+------------------------------
+
+- violations in Rails
+  - domain objects serialize themselves into JSON
+    - no big difference between representing an object as html and as json
+    - json should be part of UI layer
+
+  - controllers with big chunks of business logic
+
+  - domain objects perform all sorts of infrastructure related tasks.
+
+  - domain objects know too much about the database
+
+Make a spearate class for json serialization
+--------------------------------------------
+
+    module PersonJsonSerializer
+      def self.as_json(person)
+        #...
+      end
+    end
+
+- I prefer PersonJsonSerializer.new(person).as_json
+  - this is very jQuery-esque
+
+- results
+  - domain has no knowledge of UI
+  - two responsibilities are separated
+    - being a person
+    - serializing person to JSON
+
+Controllers don't contain any logic
+-----------------------------------
+
+- controllers should only
+  - parse user input
+  - render proper templates
+
+- domain can consist of other objects aside from persisted objects
+
+- service class for complex operation involving several objects
+
+    def sell_book
+      BookSellingService.sell_book(@book)
+    end
+
+- results
+  - controller easier to test
+  - business logic is explicit and also easier to test
+
+Domain objects should not know anything about the infrastructure underneath
+---------------------------------------------------------------------------
+
+- dependencies on external services don't belong in domain layer
+  - sending twitter message is a side effect, additional service, not part of core domain
+
+- use observers and/or services
+
+    class TwitterService
+      def self.send_tweet(subject)
+        # ...
+      end
+    end
+
+- is send_tweet(post) any worse than send_tweet(post.subject) ?
+
+- results
+  - no need to stub Twitter in every test
+  - no need for Post to test twitter service
+  - explicit separattion between core domain and twitter integration
+  - easier to make twitter integration asynchronous without touching core domain
+
+Isolate ActiveRecord
+--------------------
+
+- database schema should not affect how we design our entities.
+
+- do not design domain in a way that it's impossible to test it without using the
+  database
+
+    class PostsRepository
+    end
+
+- SqlPostsRepository and InMemoryPostsRepository
+
+    module PostsRepository
+    end
+
+    class Post < ActiveRecord::Base
+      extend PostsRepository
+    end
+
+- So Post class is essentially a repository? What happened to InMemoryPostsRepository?
+  - Post.extend InMemoryPostsRepository
+
+- Results
+  - separation of concerns
+    - but by extending, you're mixing concerns...
+  - mocking the persistent layer is straightforward
+
+Summary
+-------
+
+- more: entities and values, servies and factories, aggregate roots, domain
+  boundaries, anticorruption layters.
+
+
+http://rubysource.com/ddd-for-rails-developers-part-2-entities-and-values/
+================================================================================
+
+The building blocks of domain driven design
+-------------------------------------------
+
+Entities and values
+-------------------
+
+- Entity
+  - object defined not by its attributes but by a thread of continuity and identity
+
+- Value
+   - no concept of identity
+   - two value objects are equal if their attributes are equal
+
+
+More on entities
+----------------
+
+- entities care about their identity
+- mutable
+- long lives
+- complex life cycle
+- dealing with entities is complicated
+
+More on values
+--------------
+
+- anti-pattern: primitive obsession
+
+- characteristics of value objects
+  - no identity
+    - identity versus value
+  - immutable
+  - no complex life cycle
+
+- These are the active hash objects in baweb.
+
+Creating Value Objects in Rails
+-------------------------------
+
+Use composed_of
+---------------
+
+Value objects extending ActiveRecord::Base
+------------------------------------------
+
+- when value objects need to be persisted
+
+Plain old ruby objects
+----------------------
+
+
+http://rubysource.com/ddd-for-rails-developers-part-3-aggregates/
+================================================================================
+
+Aggregates
+----------
+
+- cluster of associated objects treated as a unit for the purpose of data changes
+- has some root
+
+Example
+-------
+
+Defining aggregate boundaries
+-----------------------------
+
+- good candidates
+  - parent-child relationships
+  - semantically close entities
+  - entities in a transaction
+
+Implementation
+--------------
+
+- bidirectional associations is a bad practice in Rails
+  - so don't link up?
+    - what about debugging? Linking up is good to find the source of a problem.
+
+- chains as a bad idea
+
+- not quite convinced. How do you enforce and communicate the aggregate?
+
+Accessing our model in view
+---------------------------
+
+- no to ItemPresenter and PaymentPresenter
+  - seems close to Aleksei's way of doing things
+
+Invariants
+----------
+
+
+
+
+

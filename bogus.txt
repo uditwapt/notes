@@ -1,0 +1,161 @@
+https://www.relishapp.com/bogus/bogus
+================================================================================
+
+Introduction to Bogus
+---------------------
+
+The problem
+-----------
+
+* Programming by wishful thinking: we can implement a class and get it to
+work before its collaborators are implemented.
+
+* Need way to verify if collaborators are already implemented.
+
+* Need integrated tests just to make sure the objects fit together.
+
+* Integration tests are slow and hard to set up.
+
+* Need some way to dry collaborators.
+
+The solution
+------------
+
+* fake(name, method: result)
+
+* name is converted to class? How about namespaces?
+
+* ensures collaborator classes exist and have the necessary interfaces.
+
+
+DRY out your fake definitions
+-----------------------------
+
+Tell-don't-ask methods
+----------------------
+
+    fake(:collaborator)
+
+    it "does something" do
+      collaborator.should have_received.method(argument)
+    end
+
+Global fake configuration
+-------------------------
+
+    Bogus.fakes do
+      fake(:students) do
+        all []
+      end
+    end
+
+Contract tests
+--------------
+
+* Bogus will remind you if you forget to add a test that verifies the
+correctness of a stub.
+
+Not only for people who use Dependency Injection
+------------------------------------------------
+
+    describe SomeClass do
+      fake_class(Collaborator)
+
+      it "does something" do
+        Collaborator.should have_received.method(argument)
+      end
+    end
+
+    describe Collaborator do
+      verify_contract(:collaborator)
+
+      it "does something" do
+        Collaborator.method(argument)
+        # ...
+      end
+    end
+
+
+Getting Started
+================================================================================
+
+* `require 'bogus/rspec'` automatically sets Bogus::RspecAdapter as the mock
+  framework. So it can't work with Rspec::Mocks?
+
+* config.search_modules << Namespace
+
+* What about global namespace?
+
+* require_relative 'fakes.rb'
+
+
+Fakes
+================================================================================
+
+
+Faking existing classes
+-----------------------
+
+* fake(fake_name, options) { ClassToCopy }
+
+* fake(fake_name, as: :class )
+
+
+Global fake configuration
+-------------------------
+
+* tell-don't-ask - no need for stubbing. Because no more return values?
+
+* dependency injection - no need for class methods
+
+    Bogus.fakes do
+      fake(:library_class, as: :class, class: proc{PublicLibrary}) do
+        books_by_author []
+      end
+    end
+
+Anonymous test doubles
+----------------------
+
+* used when migrating from another testing library (like rspec-mock)
+
+* Bogus lets its fakes respond to all methods by default
+
+* Bogus spies on methods
+
+* fake(method: proc { return value })
+  - can be used to raise errors
+
+
+Replacing classes with fakes
+----------------------------
+
+
+Faking duck types
+-----------------
+
+* make_duck(SomeClass, SomeClass)
+
+* fake(:instance) { [SomeClass, SomeClass] }
+
+
+
+Safe Stubbing
+================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
