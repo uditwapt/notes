@@ -18,3 +18,13 @@ probably that is not the best way to do it (as im not using the '-acodec codec),
 -ar is samplerate
 -ab is bitrate
 
+
+avconv -i /path/to/video.flv /path/to/audio.mp3
+
+avconv -i /path/to/video.flv /path/to/audio.mp3
+
+avconv -i 2368-rmw2013-ready-to-code-automate-your-development-environment-small.mpg                      2368-rmw2013-ready-to-code-automate-your-development-environment-small.wma
+avconv -i 2370-rmw2013-oop-and-philosophy-small.mpg                                                       2370-rmw2013-oop-and-philosophy-small.wma
+avconv -i 2379-rmw2013-dci-semiotics-applied-to-software-small.mpg                                        2379-rmw2013-dci-semiotics-applied-to-software-small.wma
+avconv -i 2380-rmw2013-more-time-for-open-source-work-with-the-help-of-the-pomodoro-technique-small.mpg   2380-rmw2013-more-time-for-open-source-work-with-the-help-of-the-pomodoro-technique-small.wma
+avconv -i 2382-rmw2013-functional-principles-for-oo-development-small.mpg                                 2382-rmw2013-functional-principles-for-oo-development-small.wma
