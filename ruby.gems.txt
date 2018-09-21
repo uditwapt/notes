@@ -10,7 +10,7 @@ Getting set up
 
 - sudo gem install gemcutter
 
-- gem tumble
+- sudo gem install tumble
   - add gemcutter.org to gem sources
 
 Pushing a gem
